@@ -1,29 +1,29 @@
 tokens = (
-    'IDENTIFIER',
-    'NUMBER',
-    'NUMBER_ID',
+    'IDENTIFIER', # variable
+    'NUMBER', # numbers (1, 2, 3...)
+    'NUMBER_ID', # variable of type number
 
-    'STRING',
-    'STRING_ID',
+    'STRING', # string ("hi", "45678",..._
+    'STRING_ID', # variable of type string
 
-    'FILE_ID',
-    'PATHFILE',
-    'LOADFILE',
-    'SETAUTHOR',
-    'SETTITLE',
-    'SAVEFILE',
+    'FILE_ID', # variable of type file
+    'PATHFILE', # path to file ("/local/usr", "/test.mp3")
+    'LOADFILE', # " 'load'
+    'SETAUTHOR', # set_author
+    'SETTITLE', # set_title
+    'SAVEFILE', # 'save'
     
-    'PLUS',
-    'LPAREN',
-    'RPAREN',
-    'LBRACKET',
-    'RBRACKET',
-    'QUOTE',
-    'COMMA',
-    'EQUALS',
-    'DOT',
+    'PLUS', # +
+    'LPAREN', # (
+    'RPAREN', # )
+    'LBRACKET', # [
+    'RBRACKET', # ]
+    'QUOTE', # "
+    'COMMA', # ,
+    'EQUALS', # =
+    'DOT', # .
 
-    'PRINT'
+    'PRINT' # print
 )
 
 t_ignore = ' \t'

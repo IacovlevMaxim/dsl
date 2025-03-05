@@ -26,6 +26,8 @@ def p_program(p):
 # -- FIlE DEFINITION --
 def p_statement_file_id_assignment(p):
     'statement : FILE_ID EQUALS LOADFILE LPAREN QUOTE PATHFILE QUOTE RPAREN'
+    # file file123 = load("local/usr/bin/t.mp3")
+    statement, file_id, equals, loadfile, lparen, quote, pathfile, quote, rparen = p
     variable_name = p[1].split()[1]
 
     file = eyed3.load(p[6])
@@ -36,6 +38,8 @@ def p_statement_file_id_assignment(p):
 # -- NUMBER DEFINITION --
 def p_statement_number_id_assignment(p):
     'statement : NUMBER_ID EQUALS numexpr'
+    # statement, number_id, equals, numexpr = p
+    # number num123 = 123
     variable_name = p[1].split()[1]
     variables[variable_name] = p[3]
     p[0] = (variable_name, p[3])
@@ -50,6 +54,7 @@ def p_numexpr_number(p):
 # -- STRING DEFINITION --
 def p_statement_string_id_assignment(p):
     'statement : STRING_ID EQUALS strexpr'
+    # string str123 = "akjshdfkl"
     variable_name = p[1].split()[1]
     variables[variable_name] = p[3]
     p[0] = (variable_name, p[3])
@@ -58,6 +63,7 @@ def p_statement_string_id_assignment(p):
 def p_strexpr(p):
     # TO-DO: use something more flexible than IDENTIFIER
     'strexpr : QUOTE IDENTIFIER QUOTE'
+    # "akjshdfkl"
     p[0] = p[2]
 
 
@@ -75,6 +81,7 @@ def p_statement_id_assignment(p):
 # ---- FILE METHODS ----
 def p_statement_file_setauthor(p):
     'statement : SETAUTHOR LPAREN IDENTIFIER COMMA strexpr RPAREN'
+    # set_author(file1, "author")
     var = p[3]
     if var in variables:
         audiofile = variables[var]
@@ -86,6 +93,7 @@ def p_statement_file_setauthor(p):
 
 def p_statement_file_settitle(p):
     'statement : SETTITLE LPAREN IDENTIFIER COMMA strexpr RPAREN'
+    # set_title(file1, "title")
     var = p[3]
     if var in variables:
         audiofile = variables[var]
