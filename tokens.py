@@ -23,7 +23,17 @@ tokens = (
     'EQUALS', # =
     'DOT', # .
 
-    'PRINT' # print
+    'EQUAL',   # ==
+    'GREATER', # >
+    'LESS',    # <
+    'NOT',     # !
+
+    'PRINT', # print
+    
+    'BOOLEAN', # True, False
+    'BOOLEAN_ID', # variable of type boolean
+    'TRUE', # True
+    'FALSE', # False
 )
 
 t_ignore = ' \t'
@@ -33,13 +43,31 @@ t_RPAREN = r'\)'
 t_EQUALS = r'='
 t_LBRACKET = r'\['
 t_RBRACKET = r'\]'
-t_QUOTE= r'\"'
+t_QUOTE = r'\"'
 t_COMMA = r','
 t_DOT = r'\.'
+t_EQUAL = r'=='
+t_GREATER = r'>'
+t_LESS = r'<'
+t_NOT = r'!'
+t_TRUE = r'True'
+t_FALSE = r'False'
+
+# t_STRING = r'\"[^"]*\"'
 # t_PATHFILE = r'^\w+.(jpg|png|gif|mp4|mp3)$'
 # t_PATHFILE = r'^([a-zA-Z]:[\\\/]|[\\\/])?([^<>:"|?*\r\n]+[\\\/]*)+$'
 # t_PATHFILE = r'[^"]+'
 # t_LOAD_FILE = r'load'
+
+
+def t_BOOLEAN(t):
+    r'True|False'
+    t.value = True if t.value == 'True' else False
+    return t
+
+def t_BOOLEAN_ID(t):
+    r'boolean\s+[a-zA-Z_][a-zA-Z_0-9]*'
+    return t
 
 def t_NEWLINE(t):
     r'\n+'
@@ -102,7 +130,8 @@ def t_PATHFILE(t):
     # r'^([a-zA-Z]:[\\\/]|[\\\/])?([^<>:"|?*\r\n]+[\\\/]*)+$'
     # r'[^"]+'
     # r'^\w+.(jpg|png|gif|mp4|mp3)$'
-    r'[\w/.-]+'
+    # r'[\w/.-]+'
+    r'([a-zA-Z_/.-]+)'
     return t
 
 def t_NUMBER(t):
