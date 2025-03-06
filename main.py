@@ -138,20 +138,30 @@ def p_expression_add(p):
 
 # ---- BOOLEAN EXPRESSIONS ----
 def p_expression_boolean_equal(p):
-    'expression : expression EQUAL expression'
+    'boolexpr : NUMBER IS_EQUAL NUMBER'
     p[0] = p[1] == p[3]
 
 def p_expression_boolean_greater(p):
-    'expression : expression GREATER expression'
+    'boolexpr : expression GREATER expression'
     p[0] = p[1] > p[3]
 
 def p_expression_boolean_less(p):
-    'expression : expression LESS expression'
+    'boolexpr : expression LESS expression'
     p[0] = p[1] < p[3]
 
 def p_expression_boolean_not(p):
-    'expression : NOT expression'
+    'boolexpr : NOT boolexpr'
     p[0] = not p[2]
+
+def p_expression_boolean_vals(p):
+    'boolexpr : BOOLEAN'
+    p[0] = bool(p[1])
+
+
+def p_expression_boolean_id(p):
+    'boolexpr : IDENTIFIER'
+    p[0] = bool(p[1])
+
 
 # ---- PRINT FUNCTION ----
 def p_statement_print(p):
@@ -169,16 +179,24 @@ def p_number_print(p):
 
 def p_string_print(p):
     'statement : PRINT LPAREN QUOTE IDENTIFIER QUOTE RPAREN'
-    print(p[3])
+    print(p[4])
 
 
 def p_boolean_print(p):
-    'statement : PRINT LPAREN BOOLEAN RPAREN'
+    'statement : PRINT LPAREN boolexpr RPAREN'
     print(p[3])
 
 # ---- BOOLEAN DEFINITION ----
 def p_statement_boolean_id_assignment(p):
-    'statement : BOOLEAN_ID EQUALS BOOLEAN'
+    '''statement : BOOLEAN_ID EQUALS BOOLEAN'''
+    # boolean var123 = True
+    variable_name = p[1].split()[1]
+    variables[variable_name] = bool(p[3])
+    p[0] = (variable_name, p[3])
+
+
+def p_statement_boolean_id_assignment_boolexpr(p):
+    '''statement : BOOLEAN_ID EQUALS boolexpr'''
     # boolean var123 = True
     variable_name = p[1].split()[1]
     variables[variable_name] = bool(p[3])
@@ -189,7 +207,7 @@ lexer = lex.lex()
 parser = yacc.yacc()
 
 
-# file_path = "./test.mp3"#os.path.join(os.getcwd(), "test.mp3")
+file_path = os.path.join(os.getcwd(), "test.mp3")
 #
 # dsl_code = f"""
 # file f = load("{file_path}")
@@ -225,7 +243,10 @@ Print function:
 # test boolean operations
 # note: fails
 dsl_code = f"""
-print(10==10)
+boolean a = True
+boolean b = !a
+print(a)
+print(b)
 """
 
 # Press the green button in the gutter to run the script.

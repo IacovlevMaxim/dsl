@@ -23,7 +23,7 @@ tokens = (
     'EQUALS', # =
     'DOT', # .
 
-    'EQUAL',   # ==
+    'IS_EQUAL',   # ==
     'GREATER', # >
     'LESS',    # <
     'NOT',     # !
@@ -40,13 +40,13 @@ t_ignore = ' \t'
 t_PLUS = r'\+'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
+t_IS_EQUAL = r'=='
 t_EQUALS = r'='
 t_LBRACKET = r'\['
 t_RBRACKET = r'\]'
 t_QUOTE = r'\"'
 t_COMMA = r','
 t_DOT = r'\.'
-t_EQUAL = r'=='
 t_GREATER = r'>'
 t_LESS = r'<'
 t_NOT = r'!'
@@ -130,8 +130,8 @@ def t_PATHFILE(t):
     # r'^([a-zA-Z]:[\\\/]|[\\\/])?([^<>:"|?*\r\n]+[\\\/]*)+$'
     # r'[^"]+'
     # r'^\w+.(jpg|png|gif|mp4|mp3)$'
-    # r'[\w/.-]+'
-    r'([a-zA-Z_/.-]+)'
+    r'\/[\w/.-]+'
+    # r'([a-zA-Z_/.-]+)'
     return t
 
 def t_NUMBER(t):
