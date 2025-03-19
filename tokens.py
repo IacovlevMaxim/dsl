@@ -18,6 +18,8 @@ tokens = (
     'RPAREN', # )
     'LBRACKET', # [
     'RBRACKET', # ]
+    'LCURLY', # {
+    'RCURLY', # }
     'QUOTE', # "
     'COMMA', # ,
     'EQUALS', # =
@@ -34,12 +36,17 @@ tokens = (
     'BOOLEAN_ID', # variable of type boolean
     'TRUE', # True
     'FALSE', # False
+
+    'IF', # if
+    'THEN' # then
 )
 
 t_ignore = ' \t'
 t_PLUS = r'\+'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
+t_LCURLY = r'\{'
+t_RCURLY = r'\}'
 t_IS_EQUAL = r'=='
 t_EQUALS = r'='
 t_LBRACKET = r'\['
@@ -54,6 +61,13 @@ t_TRUE = r'True'
 t_FALSE = r'False'
 t_STRCONTENT = r'(?<=")[^\n"]+(?=")'
 
+def t_IF(t):
+    r'if'
+    return t
+
+def t_THEN(t):
+    r'then'
+    return t
 
 def t_BOOLEAN(t):
     r'True|False'

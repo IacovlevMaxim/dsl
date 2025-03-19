@@ -226,7 +226,7 @@ def p_number_print(p):
 
 def p_string_print(p):
     'statement : PRINT LPAREN strexpr RPAREN'
-    print(p[4])
+    print(p[3])
 
 
 def p_boolean_print(p):
@@ -251,6 +251,28 @@ def p_statement_boolean_id_assignment_boolexpr(p):
     variables[variable_name] = new_var
     p[0] = (variable_name, new_var)
 
+def p_statement_if_short(p):
+    '''statement : IF LPAREN boolexpr RPAREN THEN statement'''
+    bool_val = p[3]
+    if not bool_val:
+        # skip implementation of statement if false
+        p[6] = None
+        pass
+
+def p_statement_if_extended(p):
+    '''statement : IF LPAREN boolexpr RPAREN THEN LCURLY program RCURLY'''
+    bool_val = p[3]
+    if not bool_val:
+        # skip implementation of statement if false
+        p[7] = None
+        pass
+
+def p_error(token):
+    if token is not None:
+        print ("Line %s, illegal token %s" % (token.lineno, token.value))
+    else:
+        print('Unexpected end of input')
+
 
 lexer = lex.lex()
 parser = yacc.yacc()
@@ -258,10 +280,12 @@ parser = yacc.yacc()
 
 file_path = os.path.join(os.getcwd(), "test.mp3")
 
-dsl_code = f"""
-boolean b = 0 == 0
-set_title(b, "a")
-print(b)
+dsl_code = """
+if(1 == 1) then print("wow")
+if(1 == 0) then {
+    print("hi")
+    print("hi2")
+}
 """
 
 """
@@ -299,7 +323,7 @@ Print function:
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    parser.parse(dsl_code)
+    parser.parse(dsl_code, debug=True, tracking=True)
 
 
 
