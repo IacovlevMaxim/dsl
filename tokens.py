@@ -5,9 +5,9 @@ tokens = (
 
     'STRING', # string ("hi", "45678",..._
     'STRING_ID', # variable of type string
+    'STRCONTENT',
 
     'FILE_ID', # variable of type file
-    'PATHFILE', # path to file ("/local/usr", "/test.mp3")
     'LOADFILE', # " 'load'
     'SETAUTHOR', # set_author
     'SETTITLE', # set_title
@@ -52,12 +52,7 @@ t_LESS = r'<'
 t_NOT = r'!'
 t_TRUE = r'True'
 t_FALSE = r'False'
-
-# t_STRING = r'\"[^"]*\"'
-# t_PATHFILE = r'^\w+.(jpg|png|gif|mp4|mp3)$'
-# t_PATHFILE = r'^([a-zA-Z]:[\\\/]|[\\\/])?([^<>:"|?*\r\n]+[\\\/]*)+$'
-# t_PATHFILE = r'[^"]+'
-# t_LOAD_FILE = r'load'
+t_STRCONTENT = r'(?<=")[^\n"]+(?=")'
 
 
 def t_BOOLEAN(t):
@@ -108,10 +103,6 @@ def t_FILE_ID(t):
     return t
 
 
-def t_MATRIX_ID(t):
-    r'matrix\s+[a-zA-Z_][a-zA-Z_0-9]*'
-    return t
-
 def t_NUMBER_ID(t):
     r'number\s+[a-zA-Z_][a-zA-Z_0-9]*'
     return t
@@ -121,18 +112,10 @@ def t_STRING_ID(t):
     return t
 
 def t_IDENTIFIER(t):
-    r'[a-zA-Z_][a-zA-Z_0-9]*'
+    r'(?<!"|\/)\b[a-zA-Z_^n][a-zA-Z_0-9]*\b(?!"|\/)'
     t.type = 'IDENTIFIER'
     return t
 
-def t_PATHFILE(t):
-    # r'[a-zA-Z_][a-zA-Z_0-9]*'
-    # r'^([a-zA-Z]:[\\\/]|[\\\/])?([^<>:"|?*\r\n]+[\\\/]*)+$'
-    # r'[^"]+'
-    # r'^\w+.(jpg|png|gif|mp4|mp3)$'
-    r'\/[\w/.-]+'
-    # r'([a-zA-Z_/.-]+)'
-    return t
 
 def t_NUMBER(t):
     r'\d+'

@@ -25,12 +25,12 @@ def p_program(p):
 
 # -- FIlE DEFINITION --
 def p_statement_file_id_assignment(p):
-    'statement : FILE_ID EQUALS LOADFILE LPAREN QUOTE PATHFILE QUOTE RPAREN'
+    'statement : FILE_ID EQUALS LOADFILE LPAREN strexpr RPAREN'
     # file file123 = load("local/usr/bin/t.mp3")
-    statement, file_id, equals, loadfile, lparen, quote, pathfile, quote, rparen = p
+    # statement, file_id, equals, loadfile, lparen, pathfile, rparen = p
     variable_name = p[1].split()[1]
 
-    file = eyed3.load(p[6])
+    file = eyed3.load(p[5])
     variables[variable_name] = file
     p[0] = (variable_name, file)
 
@@ -62,7 +62,8 @@ def p_statement_string_id_assignment(p):
 
 def p_strexpr(p):
     # TO-DO: use something more flexible than IDENTIFIER
-    'strexpr : QUOTE IDENTIFIER QUOTE'
+    # 'strexpr : QUOTE IDENTIFIER QUOTE'
+    'strexpr : QUOTE STRCONTENT QUOTE'
     # "akjshdfkl"
     p[0] = p[2]
 
@@ -178,7 +179,7 @@ def p_number_print(p):
     print(p[3])
 
 def p_string_print(p):
-    'statement : PRINT LPAREN QUOTE IDENTIFIER QUOTE RPAREN'
+    'statement : PRINT LPAREN strexpr RPAREN'
     print(p[4])
 
 
@@ -208,13 +209,13 @@ parser = yacc.yacc()
 
 
 file_path = os.path.join(os.getcwd(), "test.mp3")
-#
-# dsl_code = f"""
-# file f = load("{file_path}")
-# set_author(f, "Yeehaw")
-# set_title(f, "powpow2")
-# save_file(f)
-# """
+
+dsl_code = f"""
+file f = load("{file_path}")
+set_author(f, "Yeehawee")
+set_title(f, "powpow4")
+save_file(f)
+"""
 
 """
 Print function:
@@ -242,12 +243,12 @@ Print function:
 
 # test boolean operations
 # note: fails
-dsl_code = f"""
-boolean a = True
-boolean b = !a
-print(a)
-print(b)
-"""
+# dsl_code = f"""
+# boolean a = True
+# boolean b = !a
+# print(a)
+# print(b)
+# """
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
