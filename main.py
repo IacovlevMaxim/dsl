@@ -3,12 +3,35 @@ import eyed3
 import ply.lex as lex
 import ply.yacc as yacc
 from tokens import *
+from typing import Union
+from enum import Enum
+from eyed3 import AudioFile
 import os
 
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
 
 variables = {}
+
+class VariableType(Enum):
+    UNKNOWN = 0
+    NUMBER = 1
+    STRING = 2
+    AUDIO_FILE = 3
+    BOOLEAN = 4
+    type_names = {
+        UNKNOWN: "unknown",
+        NUMBER: "number",
+        STRING: "string",
+        AUDIO_FILE: "audio file",
+        BOOLEAN: "boolean"
+    }
+
+
+class Variable:
+    def __init__(self, name: str, var_type: VariableType, value: Union[int, float, str, AudioFile] = None):
+        self.name = name
+        self.type = var_type
+        self.value = value
+
 
 # TO-DO:
 # 1) Define variable types in the dictionary
@@ -29,10 +52,11 @@ def p_statement_file_id_assignment(p):
     # file file123 = load("local/usr/bin/t.mp3")
     # statement, file_id, equals, loadfile, lparen, pathfile, rparen = p
     variable_name = p[1].split()[1]
-
     file = eyed3.load(p[5])
-    variables[variable_name] = file
-    p[0] = (variable_name, file)
+
+    new_var = Variable(variable_name, VariableType.AUDIO_FILE, file)
+    variables[variable_name] = new_var
+    p[0] = (variable_name, new_var)
 
 
 # -- NUMBER DEFINITION --
@@ -41,8 +65,10 @@ def p_statement_number_id_assignment(p):
     # statement, number_id, equals, numexpr = p
     # number num123 = 123
     variable_name = p[1].split()[1]
-    variables[variable_name] = p[3]
-    p[0] = (variable_name, p[3])
+
+    new_var = Variable(variable_name, VariableType.NUMBER, p[3])
+    variables[variable_name] = new_var
+    p[0] = (variable_name, new_var)
 
 
 def p_numexpr_number(p):
@@ -56,8 +82,9 @@ def p_statement_string_id_assignment(p):
     'statement : STRING_ID EQUALS strexpr'
     # string str123 = "akjshdfkl"
     variable_name = p[1].split()[1]
-    variables[variable_name] = p[3]
-    p[0] = (variable_name, p[3])
+    new_var = Variable(variable_name, VariableType.STRING, p[3])
+    variables[variable_name] = new_var
+    p[0] = (variable_name, new_var)
 
 
 def p_strexpr(p):
@@ -73,8 +100,8 @@ def p_statement_id_assignment(p):
     # TO-DO: be more precise with expression that is passed to assign the variable
     variable_name = p[1]
     if variable_name in variables:
-        variables[variable_name] = p[3]
-        p[0] = (variable_name, p[3])
+        variables[variable_name] = Variable(variable_name, variables[variable_name].type, p[3])
+        p[0] = (variable_name, variables[variable_name])
     else:
         print(f"Error: variable {variable_name} is not defined")
 
@@ -86,7 +113,10 @@ def p_statement_file_setauthor(p):
     var = p[3]
     if var in variables:
         audiofile = variables[var]
-        audiofile.tag.artist = p[5]
+        if audiofile.type is VariableType.AUDIO_FILE:
+            audiofile.value.tag.artist = p[5]
+        else:
+            print(f"Error: variable {var} is not of type '{VariableType.AUDIO_FILE}'")
 
     else:
         print(f"Error: variable {var} is not defined")
@@ -98,7 +128,10 @@ def p_statement_file_settitle(p):
     var = p[3]
     if var in variables:
         audiofile = variables[var]
-        audiofile.tag.title = p[5]
+        if audiofile.type is VariableType.AUDIO_FILE:
+            audiofile.value.tag.title = p[5]
+        else:
+            print(f"Error: variable {var} is not of type '{VariableType.AUDIO_FILE}'")
     else:
         print(f"Error: variable {var} is not defined")
 
@@ -108,7 +141,10 @@ def p_statement_file_savefile(p):
     var = p[3]
     if var in variables:
         audiofile = variables[var]
-        audiofile.tag.save()
+        if audiofile.type is VariableType.AUDIO_FILE:
+            audiofile.value.tag.save()
+        else:
+            print(f"Error: variable {var} is not of type '{VariableType.AUDIO_FILE}'")
     else:
         print(f"Error: variable {var} is not defined")
 
@@ -128,7 +164,7 @@ def p_expression_identifier(p):
     'expression : IDENTIFIER'
     variable_name = p[1]
     if variable_name in variables:
-        p[0] = variables[variable_name]
+        p[0] = variables[variable_name].value
     else:
         print(f"Error: Variable '{variable_name}' not in variable table")
 
@@ -167,11 +203,21 @@ def p_expression_boolean_id(p):
 # ---- PRINT FUNCTION ----
 def p_statement_print(p):
     'statement : PRINT LPAREN IDENTIFIER RPAREN'
-    variable_name = p[3]
-    if variable_name in variables:
-        print(variables[variable_name])
+    if p[3] in variables:
+        variable = variables[p[3]]
+        if variable.type == VariableType.AUDIO_FILE:
+            audiofile = variable.value
+            print(f"Artist: {audiofile.tag.artist}")
+            print(f"Album: {audiofile.tag.album}")
+            print(f"Album artist: {audiofile.tag.album_artist}")
+            print(f"Title: {audiofile.tag.title}")
+            print(f"Track number: {audiofile.tag.track_num}")
+        elif variable.type == VariableType.NUMBER:
+            print(variable.value)
+        elif variable.type == VariableType.BOOLEAN:
+            print(variable.value)
     else:
-        print(f"Error: Variable '{variable_name}' not in variable table")
+        print(f"Error: Variable '{p[3]}' not in variable table")
 
 
 def p_number_print(p):
@@ -192,16 +238,18 @@ def p_statement_boolean_id_assignment(p):
     '''statement : BOOLEAN_ID EQUALS BOOLEAN'''
     # boolean var123 = True
     variable_name = p[1].split()[1]
-    variables[variable_name] = bool(p[3])
-    p[0] = (variable_name, p[3])
+    new_var = Variable(variable_name, VariableType.BOOLEAN, bool(p[3]))
+    variables[variable_name] = new_var
+    p[0] = (variable_name, new_var)
 
 
 def p_statement_boolean_id_assignment_boolexpr(p):
     '''statement : BOOLEAN_ID EQUALS boolexpr'''
     # boolean var123 = True
     variable_name = p[1].split()[1]
-    variables[variable_name] = bool(p[3])
-    p[0] = (variable_name, p[3])
+    new_var = Variable(variable_name, VariableType.BOOLEAN, bool(p[3]))
+    variables[variable_name] = new_var
+    p[0] = (variable_name, new_var)
 
 
 lexer = lex.lex()
@@ -211,10 +259,9 @@ parser = yacc.yacc()
 file_path = os.path.join(os.getcwd(), "test.mp3")
 
 dsl_code = f"""
-file f = load("{file_path}")
-set_author(f, "Yeehawee")
-set_title(f, "powpow4")
-save_file(f)
+boolean b = 0 == 0
+set_title(b, "a")
+print(b)
 """
 
 """
