@@ -148,7 +148,6 @@ class IfStatement(ASTNode):
 
     def eval(self):
         if self.condition.eval():
-            print("self.then_branch", self.then_branch)
             return self.then_branch.eval()
         elif self.else_branch:
             return self.else_branch.eval()
@@ -168,19 +167,25 @@ class FunctionCall(ASTNode):
         if self.func_name == 'print':
             print(*args)
         elif self.func_name == 'set_author':
-            var_name = args[0]
+            var_name = self.args[0].name
             author = args[1]
             if var_name in variables and variables[var_name].type == VariableType.AUDIO_FILE:
                 variables[var_name].value.tag.artist = author
         elif self.func_name == 'set_title':
-            var_name = args[0]
+            var_name = self.args[0].name
             title = args[1]
             if var_name in variables and variables[var_name].type == VariableType.AUDIO_FILE:
                 variables[var_name].value.tag.title = title
         elif self.func_name == 'save_file':
-            var_name = args[0]
+            var_name = self.args[0].name
             if var_name in variables and variables[var_name].type == VariableType.AUDIO_FILE:
                 variables[var_name].value.tag.save()
+        elif self.func_name == 'loadfile':
+            path = args[0]
+            file = eyed3.load(path)
+            return file
+
+
         # Add more function calls as needed
 
 # ---- PROGRAM ----
@@ -316,7 +321,7 @@ def p_statement_file_savefile(p):
 
 def p_error(token):
     if token is not None:
-        print ("Line %s, illegal token %s" % (token.lineno, token.value))
+        print("Line %s, illegal token %s" % (token.lineno, token.value))
     else:
         print('Unexpected end of input')
 
@@ -326,13 +331,11 @@ parser = yacc.yacc()
 
 file_path = os.path.join(os.getcwd(), "test.mp3")
 
-dsl_code = """
-number n = 23
-if(1 == 1) then { 
-    if(22 == 22) then {
-        print(n)
-    }
-}
+dsl_code = f"""
+file f1 = load("{file_path}")
+set_author(f1, "Yeet")
+set_title(f1, "Cookie crisp")
+save_file(f1)
 """
 
 if __name__ == '__main__':
