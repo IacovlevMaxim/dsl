@@ -1,6 +1,6 @@
 venv/
 .idea/
 __pycache__/
-parser.out
+*.out
 parsetab.py
 test.mp3

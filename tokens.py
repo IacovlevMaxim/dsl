@@ -13,6 +13,7 @@ tokens = (
     'SAVEFILE', # 'save'
     
     'PLUS', # +
+    'MINUS', # -
     'LPAREN', # (
     'RPAREN', # )
     'LBRACKET', # [
@@ -42,6 +43,7 @@ tokens = (
 
 t_ignore = ' \t'
 t_PLUS = r'\+'
+t_MINUS = r'\-'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
 t_LCURLY = r'\{'
