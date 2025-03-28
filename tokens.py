@@ -9,8 +9,7 @@ tokens = (
 
     'FILE_ID', # variable of type file
     'LOADFILE', # " 'load'
-    'SETAUTHOR', # set_author
-    'SETTITLE', # set_title
+    'SET', # set
     'SAVEFILE', # 'save'
     
     'PLUS', # +
@@ -59,7 +58,7 @@ t_LESS = r'<'
 t_NOT = r'!'
 t_TRUE = r'True'
 t_FALSE = r'False'
-t_STRCONTENT = r'(?<=")[^\n"]+(?=")'
+t_STRCONTENT = r'(?<=")[^"\n,]+(?=")'
 
 def t_IF(t):
     r'if'
@@ -95,15 +94,9 @@ def t_LOADFILE(t):
     return t
 
 
-def t_SETAUTHOR(t):
-    r'set_author'
-    t.type = 'SETAUTHOR'
-    return t
-
-
-def t_SETTITLE(t):
-    r'set_title'
-    t.type = 'SETTITLE'
+def t_SET(t):
+    r'set'
+    t.type = 'SET'
     return t
 
 
