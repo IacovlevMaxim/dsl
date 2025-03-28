@@ -166,19 +166,14 @@ class FunctionCall(ASTNode):
 
         if self.func_name == 'print':
             print(*args)
-        elif self.func_name == 'set_author':
+        elif self.func_name == 'set':
             var_name = self.args[0].name
-            author = args[1]
-            if var_name in variables and variables[var_name].type == VariableType.AUDIO_FILE:
-                variables[var_name].value.tag.artist = author
-        elif self.func_name == 'set_title':
-            var_name = self.args[0].name
-            title = args[1]
-            if var_name in variables and variables[var_name].type == VariableType.AUDIO_FILE:
-                variables[var_name].value.tag.title = title
+
+            if variables[var_name].type == VariableType.AUDIO_FILE:
+                setattr(variables[var_name].value.tag, args[1], args[2])
         elif self.func_name == 'save_file':
             var_name = self.args[0].name
-            if var_name in variables and variables[var_name].type == VariableType.AUDIO_FILE:
+            if variables[var_name].type == VariableType.AUDIO_FILE:
                 variables[var_name].value.tag.save()
         elif self.func_name == 'loadfile':
             path = args[0]
@@ -307,13 +302,10 @@ def p_statement_if_extended(p):
     p[0] = IfStatement(p[3], p[7])
 
 # ---- FILE METHODS ----
-def p_statement_file_setauthor(p):
-    'statement : SETAUTHOR LPAREN IDENTIFIER COMMA strexpr RPAREN'
-    p[0] = FunctionCall('set_author', [Identifier(p[3]), p[5]])
+def p_statement_file_set(p):
+    'statement : SET LPAREN IDENTIFIER COMMA strexpr COMMA strexpr RPAREN'
+    p[0] = FunctionCall('set', [Identifier(p[3]), p[5], p[7]])
 
-def p_statement_file_settitle(p):
-    'statement : SETTITLE LPAREN IDENTIFIER COMMA strexpr RPAREN'
-    p[0] = FunctionCall('set_title', [Identifier(p[3]), p[5]])
 
 def p_statement_file_savefile(p):
     'statement : SAVEFILE LPAREN IDENTIFIER RPAREN'
@@ -333,8 +325,8 @@ file_path = os.path.join(os.getcwd(), "test.mp3")
 
 dsl_code = f"""
 file f1 = load("{file_path}")
-set_author(f1, "Yeet")
-set_title(f1, "Cookie crisp")
+set(f2, "artist", "Yeet")
+set(f1, "title", "Cookie Crisp")
 save_file(f1)
 """
 
