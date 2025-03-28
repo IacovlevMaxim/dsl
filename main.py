@@ -93,6 +93,8 @@ class BinaryOperation(ASTNode):
 
         if self.op == '+':
             return left_val + right_val
+        elif self.op == '-':
+            return left_val - right_val
         elif self.op == '==':
             return left_val == right_val
         elif self.op == '>':
@@ -209,6 +211,14 @@ def p_numexpr_number(p):
     'numexpr : NUMBER'
     p[0] = Literal(p[1])
 
+def p_numexpr_number_plus(p):
+    'numexpr : numexpr PLUS numexpr'
+    p[0] = BinaryOperation(p[1], '+', p[3])
+
+def p_numexpr_number_minus(p):
+    'numexpr : numexpr MINUS numexpr'
+    p[0] = BinaryOperation(p[1], '-', p[3])
+
 def p_statement_string_id_assignment(p):
     'statement : STRING_ID EQUALS strexpr'
     variable_name = p[1].split()[1]
@@ -240,16 +250,20 @@ def p_expression_add(p):
     p[0] = BinaryOperation(p[1], '+', p[3])
 
 # ---- BOOLEAN EXPRESSIONS ----
-def p_expression_boolean_equal(p):
-    'boolexpr : NUMBER IS_EQUAL NUMBER'
-    p[0] = BinaryOperation(Literal(p[1]), '==', Literal(p[3]))
+def p_expression_boolean_equal_num(p):
+    'boolexpr : numexpr IS_EQUAL numexpr'
+    p[0] = BinaryOperation(p[1], '==', p[3])
+
+def p_expression_boolean_equal_bool(p):
+    'boolexpr : boolexpr IS_EQUAL boolexpr'
+    p[0] = BinaryOperation(p[1], '==', p[3])
 
 def p_expression_boolean_greater(p):
-    'boolexpr : expression GREATER expression'
+    'boolexpr : numexpr GREATER numexpr'
     p[0] = BinaryOperation(p[1], '>', p[3])
 
 def p_expression_boolean_less(p):
-    'boolexpr : expression LESS expression'
+    'boolexpr : numexpr LESS numexpr'
     p[0] = BinaryOperation(p[1], '<', p[3])
 
 def p_expression_boolean_not(p):
@@ -270,8 +284,8 @@ def p_statement_print(p):
     p[0] = FunctionCall('print', [Identifier(p[3])])
 
 def p_number_print(p):
-    'statement : PRINT LPAREN NUMBER RPAREN'
-    p[0] = FunctionCall('print', [Literal(p[3])])
+    'statement : PRINT LPAREN numexpr RPAREN'
+    p[0] = FunctionCall('print', [p[3]])
 
 def p_string_print(p):
     'statement : PRINT LPAREN strexpr RPAREN'
@@ -282,10 +296,6 @@ def p_boolean_print(p):
     p[0] = FunctionCall('print', [p[3]])
 
 # ---- BOOLEAN DEFINITION ----
-def p_statement_boolean_id_assignment(p):
-    '''statement : BOOLEAN_ID EQUALS BOOLEAN'''
-    variable_name = p[1].split()[1]
-    p[0] = VariableDeclaration(VariableType.BOOLEAN, variable_name, Literal(bool(p[3])))
 
 def p_statement_boolean_id_assignment_boolexpr(p):
     '''statement : BOOLEAN_ID EQUALS boolexpr'''
@@ -324,10 +334,8 @@ parser = yacc.yacc()
 file_path = os.path.join(os.getcwd(), "test.mp3")
 
 dsl_code = f"""
-file f1 = load("{file_path}")
-set(f2, "artist", "Yeet")
-set(f1, "title", "Cookie Crisp")
-save_file(f1)
+number n = 1-1
+print(n)
 """
 
 if __name__ == '__main__':
