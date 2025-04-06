@@ -328,17 +328,21 @@ def p_error(token):
         print('Unexpected end of input')
 
 
+def load_dsl_file(filename="code.txt"):
+    try:
+        with open(filename, 'r') as file:
+            return file.read()
+    except FileNotFoundError:
+        print(f"Warning: {filename} not found.")
+
 lexer = lex.lex()
 parser = yacc.yacc()
 
 file_path = os.path.join(os.getcwd(), "test.mp3")
 
-dsl_code = f"""
-number n = 1-1
-print(n)
-"""
 
 if __name__ == '__main__':
+    dsl_code = load_dsl_file()
     ast = parser.parse(dsl_code)
     ast.eval()
 
