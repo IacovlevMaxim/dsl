@@ -95,13 +95,18 @@ class BinaryOperation(ASTNode):
             return left_val + right_val
         elif self.op == '-':
             return left_val - right_val
+        elif self.op == '*':
+            return left_val * right_val
+        elif self.op == '/':
+            if right_val == 0:
+                raise ZeroDivisionError("Division by zero")
+            return left_val / right_val
         elif self.op == '==':
             return left_val == right_val
         elif self.op == '>':
             return left_val > right_val
         elif self.op == '<':
             return left_val < right_val
-        # Add more operations as needed
 
 
 class UnaryOperation(ASTNode):
@@ -115,6 +120,8 @@ class UnaryOperation(ASTNode):
         val = self.expr.eval()
         if self.op == 'NOT':
             return not val
+        elif self.op == '-':  # Handle negative numbers
+            return -val
         # Add more unary operations as needed
 
 
@@ -211,6 +218,14 @@ def p_numexpr_number(p):
     'numexpr : NUMBER'
     p[0] = Literal(p[1])
 
+def p_numexpr_number_multiply(p):
+    'numexpr : numexpr MULTIPLY numexpr'
+    p[0] = BinaryOperation(p[1], '*', p[3])
+
+def p_numexpr_number_divide(p):
+    'numexpr : numexpr DIVIDE numexpr'
+    p[0] = BinaryOperation(p[1], '/', p[3])
+
 def p_numexpr_number_plus(p):
     'numexpr : numexpr PLUS numexpr'
     p[0] = BinaryOperation(p[1], '+', p[3])
@@ -218,6 +233,10 @@ def p_numexpr_number_plus(p):
 def p_numexpr_number_minus(p):
     'numexpr : numexpr MINUS numexpr'
     p[0] = BinaryOperation(p[1], '-', p[3])
+
+def p_numexpr_brackets(p):
+    'numexpr : LPAREN numexpr RPAREN'
+    p[0] = p[2]  # Pass the inner expression directly
 
 def p_statement_string_id_assignment(p):
     'statement : STRING_ID EQUALS strexpr'

@@ -1,49 +1,53 @@
 tokens = (
-    'IDENTIFIER', # variable
-    'NUMBER', # numbers (1, 2, 3...)
-    'NUMBER_ID', # variable of type number
+    'IDENTIFIER',  # variable
+    'NUMBER',  # numbers (1, 2, 3...)
+    'NUMBER_ID',  # variable of type number
 
-    'STRING', # string ("hi", "45678",..._
-    'STRING_ID', # variable of type string
+    'STRING',  # string ("hi", "45678",..._
+    'STRING_ID',  # variable of type string
     'STRCONTENT',
 
-    'FILE_ID', # variable of type file
-    'LOADFILE', # " 'load'
-    'SET', # set
-    'SAVEFILE', # 'save'
-    
-    'PLUS', # +
-    'MINUS', # -
-    'LPAREN', # (
-    'RPAREN', # )
-    'LBRACKET', # [
-    'RBRACKET', # ]
-    'LCURLY', # {
-    'RCURLY', # }
-    'QUOTE', # "
-    'COMMA', # ,
-    'EQUALS', # =
-    'DOT', # .
+    'FILE_ID',  # variable of type file
+    'LOADFILE',  # " 'load'
+    'SET',  # set
+    'SAVEFILE',  # 'save'
 
-    'IS_EQUAL',   # ==
-    'GREATER', # >
-    'LESS',    # <
-    'NOT',     # !
+    'PLUS',  # +
+    'MINUS',  # -
+    'MULTIPLY',  # *
+    'DIVIDE',  # /
+    'LPAREN',  # (
+    'RPAREN',  # )
+    'LBRACKET',  # [
+    'RBRACKET',  # ]
+    'LCURLY',  # {
+    'RCURLY',  # }
+    'QUOTE',  # "
+    'COMMA',  # ,
+    'EQUALS',  # =
+    'DOT',  # .
 
-    'PRINT', # print
-    
-    'BOOLEAN', # True, False
-    'BOOLEAN_ID', # variable of type boolean
-    'TRUE', # True
-    'FALSE', # False
+    'IS_EQUAL',  # ==
+    'GREATER',  # >
+    'LESS',  # <
+    'NOT',  # !
 
-    'IF', # if
-    'THEN' # then
+    'PRINT',  # print
+
+    'BOOLEAN',  # True, False
+    'BOOLEAN_ID',  # variable of type boolean
+    'TRUE',  # True
+    'FALSE',  # False
+
+    'IF',  # if
+    'THEN'  # then
 )
 
 t_ignore = ' \t'
 t_PLUS = r'\+'
 t_MINUS = r'\-'
+t_MULTIPLY = r'\*'
+t_DIVIDE = r'\/'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
 t_LCURLY = r'\{'
@@ -137,5 +141,3 @@ def t_error(t):
     t.value = t.value[0]
     t.lexer.skip(1)
     return t
-
-
