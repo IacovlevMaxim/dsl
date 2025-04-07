@@ -335,11 +335,9 @@ def load_dsl_file(filename="code.txt"):
     except FileNotFoundError:
         print(f"Warning: {filename} not found.")
 
+
 lexer = lex.lex()
 parser = yacc.yacc()
-
-file_path = os.path.join(os.getcwd(), "test.mp3")
-
 
 if __name__ == '__main__':
     dsl_code = load_dsl_file()
