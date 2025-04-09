@@ -131,7 +131,7 @@ def t_IDENTIFIER(t):
 
 
 def t_NUMBER(t):
-    r'\d+'
+    r'-?\d+'  # Modified to allow negative numbers with a leading minus sign
     t.value = int(t.value)
     return t
 
