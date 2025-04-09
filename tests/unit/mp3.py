@@ -186,3 +186,25 @@ class TestMP3Metadata(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+# note:
+# === TEST STATUS SUMMARY ===
+# ✅ Working tests:
+# - test_load_mp3_file: loads an MP3 file and assigns it to a DSL variable
+# - test_set_artist_metadata: sets artist field successfully
+# - test_set_album_metadata: sets album field successfully
+# - test_set_title_metadata: sets title field successfully
+# - test_set_multiple_metadata_fields: sets artist, album, and title together
+# - test_save_file_without_changes: ensures file saves even with no metadata changes
+
+# ❌ Not working tests:
+# - test_full_metadata_edit: parser fails due to unrecognized numeric value (e.g., track_num = 3)
+# - test_set_track_num_metadata: same issue with numeric argument parsing
+# - test_set_invalid_metadata_field: does not raise AttributeError as expected (missing field validation in set)
+# - test_print_file_variable: print() output does not include 'AudioFile' as the test expects
+
+# 🛠️ Needed fixes:
+# - Update grammar in main.py to support numeric values in `set(...)`
+# - Add validation for allowed metadata fields before `setattr(...)`
+# - Adjust test for print output or update the DSL print behavior
