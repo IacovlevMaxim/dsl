@@ -67,14 +67,19 @@ class VariableDeclaration(ASTNode):
 class Assignment(ASTNode):
     """Represents variable assignment"""
 
-    def __init__(self, name, value_expr):
+    def __init__(self, name, value_expr, expr_type):
         self.name = name
         self.value_expr = value_expr
+        self.expr_type = expr_type
 
     def eval(self):
         if self.name not in variables:
-            raise NameError(f"Variable '{self.name}' not defined")
+            raise NameError(f"Cannot assign to '{self.name}' (not defined)")
+
         value = self.value_expr.eval()
+        if variables[self.name].type != self.expr_type:
+            raise TypeError(f"Value '{value}' is not of variable type '{self.name}'")
+
         variables[self.name].value = value
         return value
 
@@ -228,26 +233,21 @@ def p_strexpr(p):
     'strexpr : QUOTE STRCONTENT QUOTE'
     p[0] = Literal(p[2])
 
-def p_statement_id_assignment(p):
-    'statement : IDENTIFIER EQUALS expression'
-    p[0] = Assignment(p[1], p[3])
+def p_id_eq_numexpr(p):
+    'statement : IDENTIFIER EQUALS numexpr'
+    p[0] = Assignment(p[1], p[3], VariableType.NUMBER)
 
-# ---- EXPRESSIONS ----
-def p_expression_number(p):
-    'expression : numexpr'
-    p[0] = p[1]
+def p_id_eq_boolexpr(p):
+    'statement : IDENTIFIER EQUALS boolexpr'
+    p[0] = Assignment(p[1], p[3], VariableType.BOOLEAN)
 
-def p_expression_string(p):
-    'expression : strexpr'
-    p[0] = p[1]
+def p_id_eq_strexpr(p):
+    'statement : IDENTIFIER EQUALS strexpr'
+    p[0] = Assignment(p[1], p[3], VariableType.STRING)
 
-def p_expression_identifier(p):
-    'expression : IDENTIFIER'
-    p[0] = Identifier(p[1])
-
-def p_expression_add(p):
-    'expression : expression PLUS expression'
-    p[0] = BinaryOperation(p[1], '+', p[3])
+def p_id_eq_loadfile(p):
+    'statement : IDENTIFIER EQUALS LOADFILE LPAREN strexpr RPAREN'
+    p[0] = Assignment(p[1], FunctionCall('loadfile', [p[5]]), VariableType.AUDIO_FILE)
 
 # ---- BOOLEAN EXPRESSIONS ----
 def p_expression_boolean_equal_num(p):
