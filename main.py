@@ -179,7 +179,22 @@ class FunctionCall(ASTNode):
         args = [arg.eval() for arg in self.args]
 
         if self.func_name == 'print':
-            print(*args)
+            for arg in self.args:
+                value = arg.eval()
+                # Print metadata if AUDIO_FILE
+                if isinstance(arg, Identifier) and arg.name in variables:
+                    var = variables[arg.name]
+                    if var.type == VariableType.AUDIO_FILE:
+                        tag = var.value.tag
+                        print(f"title: {tag.title or 'None'}")
+                        print(f"artist: {tag.artist or 'None'}")
+                        print(f"album: {tag.album or 'None'}")
+                        print(f"album artist: {tag.album_artist or 'None'}")
+                        print(f"track: {tag.track_num[0] if tag.track_num else 'None'}")
+                    else:
+                        print(value)
+                else:
+                    print(value)
         elif self.func_name == 'set':
             var_name = self.args[0].name
 
