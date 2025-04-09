@@ -29,6 +29,12 @@ class MulDivTests(unittest.TestCase):
         self.assertEqual(output, "3")
 
     @unittest.mock.patch('sys.stdout', new_callable=io.StringIO)
+    def test_operator_precedence(self, mock_stdout):
+        code = "print(-(((1))))"
+        output = get_output(code, mock_stdout)
+        self.assertEqual(output, "-1")
+
+    @unittest.mock.patch('sys.stdout', new_callable=io.StringIO)
     def test_chained_operations(self, mock_stdout):
         code = "print(2 * (3 + (4 / 2)))"
         output = get_output(code, mock_stdout)

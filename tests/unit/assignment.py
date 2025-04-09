@@ -27,6 +27,13 @@ class AssignmentTestCase(unittest.TestCase):
         self.assertEqual(output, "2")
 
     @unittest.mock.patch('sys.stdout', new_callable=io.StringIO)
+    def test_numid_uminus(self, mock_stdout):
+        code = "number a = 1\na = -1\nprint(a)"
+        output = get_output(code, mock_stdout)
+
+        self.assertEqual(output, "-1")
+
+    @unittest.mock.patch('sys.stdout', new_callable=io.StringIO)
     def test_numid_numexpr(self, mock_stdout):
         code = "number a = 1\na = 1+1\nprint(a)"
         output = get_output(code, mock_stdout)
