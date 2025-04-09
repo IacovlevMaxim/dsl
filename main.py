@@ -100,13 +100,18 @@ class BinaryOperation(ASTNode):
             return left_val + right_val
         elif self.op == '-':
             return left_val - right_val
+        elif self.op == '*':
+            return left_val * right_val
+        elif self.op == '/':
+            if right_val == 0:
+                raise ZeroDivisionError("Division by zero")
+            return left_val / right_val
         elif self.op == '==':
             return left_val == right_val
         elif self.op == '>':
             return left_val > right_val
         elif self.op == '<':
             return left_val < right_val
-        # Add more operations as needed
 
 
 class UnaryOperation(ASTNode):
@@ -120,6 +125,8 @@ class UnaryOperation(ASTNode):
         val = self.expr.eval()
         if self.op == 'NOT':
             return not val
+        elif self.op == '-':  # Handle negative numbers
+            return -val
         # Add more unary operations as needed
 
 
@@ -216,6 +223,18 @@ def p_numexpr_number(p):
     'numexpr : NUMBER'
     p[0] = Literal(p[1])
 
+def p_numexpr_negative(p):
+    'numexpr : MINUS numexpr %prec UMINUS'
+    p[0] = UnaryOperation('-', p[2])
+
+def p_numexpr_number_multiply(p):
+    'numexpr : numexpr MULTIPLY numexpr'
+    p[0] = BinaryOperation(p[1], '*', p[3])
+
+def p_numexpr_number_divide(p):
+    'numexpr : numexpr DIVIDE numexpr'
+    p[0] = BinaryOperation(p[1], '/', p[3])
+
 def p_numexpr_number_plus(p):
     'numexpr : numexpr PLUS numexpr'
     p[0] = BinaryOperation(p[1], '+', p[3])
@@ -223,6 +242,10 @@ def p_numexpr_number_plus(p):
 def p_numexpr_number_minus(p):
     'numexpr : numexpr MINUS numexpr'
     p[0] = BinaryOperation(p[1], '-', p[3])
+
+def p_numexpr_brackets(p):
+    'numexpr : LPAREN numexpr RPAREN'
+    p[0] = p[2]  # Pass the inner expression directly
 
 def p_statement_string_id_assignment(p):
     'statement : STRING_ID EQUALS strexpr'
@@ -321,6 +344,13 @@ def p_statement_file_savefile(p):
     'statement : SAVEFILE LPAREN IDENTIFIER RPAREN'
     p[0] = FunctionCall('save_file', [Identifier(p[3])])
 
+# Rules to handle negative numbers and operator precedence
+precedence = (
+    ('left', 'PLUS', 'MINUS'),
+    ('left', 'MULTIPLY', 'DIVIDE'),
+    ('right', 'UMINUS'),  # Unary minus operator
+)
+
 def p_error(token):
     if token is not None:
         print("Line %s, illegal token %s" % (token.lineno, token.value))
@@ -343,7 +373,3 @@ if __name__ == '__main__':
     dsl_code = load_dsl_file()
     ast = parser.parse(dsl_code)
     ast.eval()
-
-
-
-
