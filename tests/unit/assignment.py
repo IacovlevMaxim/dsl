@@ -55,6 +55,20 @@ class AssignmentTestCase(unittest.TestCase):
         self.assertEqual(output, "b")
 
     @unittest.mock.patch('sys.stdout', new_callable=io.StringIO)
+    def test_strid_strnum(self, mock_stdout):
+        code = 'string s = "1"\nprint(s)'
+        output = get_output(code, mock_stdout)
+
+        self.assertEqual(output, "1")
+
+    @unittest.mock.patch('sys.stdout', new_callable=io.StringIO)
+    def test_strid_strnum_neg(self, mock_stdout):
+        code = 'string s = "-1"\nprint(s)'
+        output = get_output(code, mock_stdout)
+
+        self.assertEqual(output, "-1")
+
+    @unittest.mock.patch('sys.stdout', new_callable=io.StringIO)
     def test_strid_num(self, mock_stdout):
         code = "string s = \"a\"\ns = 1\nprint(s)"
         with self.assertRaises(TypeError):
@@ -87,18 +101,17 @@ class AssignmentTestCase(unittest.TestCase):
             self.file1 = tmp1.name
             self.file2 = tmp2.name
 
-            tmp1.write(b'dummy mp3 data')
-            tmp2.write(b'dummy mp3 data')
-
             tmp1.flush()
             tmp2.flush()
+
+            os.system(f"cp ../../test.mp3 {tmp1.name}")
+            os.system(f"cp ../../test.mp3 {tmp2.name}")
         try:
             # Run your test code with the temporary files
-            code = f'file f = load("{self.file1}")\nf = load("{self.file2}")\nprint(f)'
+            code = f'file f = load("{self.file1}")\nprint(f)'
             output = get_output(code, mock_stdout)
 
             print(output)
-
         finally:
             try:
                 os.unlink(self.file1)

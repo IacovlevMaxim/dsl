@@ -3,5 +3,6 @@ venv/
 __pycache__/
 *.out
 parsetab.py
-test.mp3
+test.*
 code.txt
+.DS_Store
