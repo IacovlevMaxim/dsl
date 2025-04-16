@@ -1,3 +1,4 @@
+import exiftool
 import eyed3
 import ply.lex as lex
 import ply.yacc as yacc
@@ -5,8 +6,7 @@ from tokens import *
 from typing import Union
 from enum import Enum
 from eyed3 import AudioFile
-import os
-
+from image_metadata import metadata_prefix
 
 variables = {}
 
@@ -16,12 +16,14 @@ class VariableType(Enum):
     STRING = 2
     AUDIO_FILE = 3
     BOOLEAN = 4
+    IMAGE_FILE = 5
     type_names = {
         UNKNOWN: "unknown",
         NUMBER: "number",
         STRING: "string",
         AUDIO_FILE: "audio file",
-        BOOLEAN: "boolean"
+        BOOLEAN: "boolean",
+        IMAGE_FILE: "image file"
     }
 
 
@@ -55,6 +57,9 @@ class VariableDeclaration(ASTNode):
 
     def __init__(self, var_type, name, value_expr):
         self.var_type = var_type
+        if var_type == VariableType.UNKNOWN:
+            raise SyntaxError(f"Unknown variable type for variable '{name}'. Invalid or unsupported extension?")
+
         self.name = name
         self.value_expr = value_expr
 
@@ -179,23 +184,61 @@ class FunctionCall(ASTNode):
         args = [arg.eval() for arg in self.args]
 
         if self.func_name == 'print':
-            print(*args)
+            for arg in self.args:
+                value = arg.eval()
+                # Print metadata if AUDIO_FILE
+                if isinstance(arg, Identifier) and arg.name in variables:
+                    var = variables[arg.name]
+                    if var.type == VariableType.AUDIO_FILE:
+                        tag = var.value.tag
+                        print(f"title: {tag.title or 'None'}")
+                        print(f"artist: {tag.artist or 'None'}")
+                        print(f"album: {tag.album or 'None'}")
+                        print(f"album artist: {tag.album_artist or 'None'}")
+                        print(f"track: {tag.track_num[0] if tag.track_num else 'None'}")
+                    elif var.type == VariableType.IMAGE_FILE:
+                        metadata = var.value
+                        for key, value in metadata.items():
+                            print(f"{key}: {value}")
+                    else:
+                        print(value)
+                else:
+                    print(value)
         elif self.func_name == 'set':
             var_name = self.args[0].name
+            var_type = variables[var_name].type
 
-            if variables[var_name].type == VariableType.AUDIO_FILE:
+            if var_type == VariableType.AUDIO_FILE:
                 setattr(variables[var_name].value.tag, args[1], args[2])
+            elif var_type == VariableType.IMAGE_FILE:
+                metadata = variables[var_name].value
+                file_path = metadata["File:Directory"] + "/" + metadata["SourceFile"]
+                key = args[1] if ":" in args[1] else f"{metadata_prefix(args[1])}:{args[1]}"
+                print("key", key)
+                value = args[2]
+                with exiftool.ExifTool() as et:
+                    et.execute(f"-{key}={value}", file_path)
+
+                variables[var_name].value[key] = value
+
         elif self.func_name == 'save_file':
             var_name = self.args[0].name
             if variables[var_name].type == VariableType.AUDIO_FILE:
                 variables[var_name].value.tag.save()
         elif self.func_name == 'loadfile':
             path = args[0]
-            file = eyed3.load(path)
+            if len(path.split('.')) < 2:
+                raise SyntaxError(f"No file extension provided for path '{path}'")
+            file_extension = path.split('.')[1]
+            if file_extension == "mp3":
+                file = eyed3.load(path)
+            elif file_extension == "png" or file_extension == "jpg":
+                with exiftool.ExifToolHelper() as et:
+                    file = et.get_metadata(path)[0]
+            else:
+                raise SyntaxError(f"Unsupported file extension '{file_extension}'")
             return file
 
-
-        # Add more function calls as needed
 
 # ---- PROGRAM ----
 def p_program(p):
@@ -211,7 +254,15 @@ def p_program(p):
 def p_statement_file_id_assignment(p):
     'statement : FILE_ID EQUALS LOADFILE LPAREN strexpr RPAREN'
     variable_name = p[1].split()[1]
-    p[0] = VariableDeclaration(VariableType.AUDIO_FILE, variable_name,
+    file_extension = p[5].value.split('.')[1]
+    if file_extension == "mp3":
+        variable_type = VariableType.AUDIO_FILE
+    elif file_extension == "png" or file_extension == "jpg":
+        variable_type = VariableType.IMAGE_FILE
+    else:
+        variable_type = VariableType.UNKNOWN
+
+    p[0] = VariableDeclaration(variable_type, variable_name,
                               FunctionCall('loadfile', [p[5]]))
 
 def p_statement_number_id_assignment(p):
