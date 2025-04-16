@@ -267,6 +267,10 @@ def p_numexpr_number(p):
     'numexpr : NUMBER'
     p[0] = Literal(p[1])
 
+def p_numexpr_identifier(p):
+    'numexpr : IDENTIFIER'
+    p[0] = Identifier(p[1])
+
 def p_numexpr_negative(p):
     'numexpr : MINUS numexpr %prec UMINUS'
     p[0] = UnaryOperation('-', p[2])
@@ -373,6 +377,7 @@ def p_statement_boolean_id_assignment_boolexpr(p):
     '''statement : BOOLEAN_ID EQUALS boolexpr'''
     variable_name = p[1].split()[1]
     p[0] = VariableDeclaration(VariableType.BOOLEAN, variable_name, p[3])
+
 
 # ---- IF STATEMENTS ----
 def p_statement_if_short(p):
