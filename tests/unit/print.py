@@ -100,21 +100,17 @@ class PrintTestCase(unittest.TestCase):
 
     @unittest.mock.patch('sys.stdout', new_callable=io.StringIO)
     def test_print_mp3_info(self, mock_stdout):
-        # Create a temporary MP3 file
         with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
             self.file = tmp.name
 
         try:
-            # Copy a valid MP3 file into the temporary file
-            os.system(f"cp /Users/viktorianicologlo/PycharmProjects/dsl/test.mp3 {tmp.name}")
+            os.system(f"cp ../../test.mp3 {tmp.name}")
 
-            # DSL code to load the file, set metadata, and print it
             code = f"""
                     file f = load("{self.file}")
                     set(f, "title", "Test Title")
                     set(f, "artist", "Test Artist")
-                    set(f, "album", "None")
-                    set(f, "album artist", "Test Album Artist")
+                    set(f, "album_artist", "Test Album Artist")
                     set(f, "track", "1")
                     print(f)
                 """
@@ -127,14 +123,11 @@ class PrintTestCase(unittest.TestCase):
                 "track: 1"
             )
 
-            # Execute the DSL code
             output = get_output(code, mock_stdout)
 
-            # Assert the output matches the expected metadata
             self.assertEqual(output, expected_output)
 
         finally:
-            # Clean up the temporary file
             try:
                 os.unlink(tmp.name)
             except OSError:
