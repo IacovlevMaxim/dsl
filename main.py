@@ -179,7 +179,23 @@ class FunctionCall(ASTNode):
         args = [arg.eval() for arg in self.args]
 
         if self.func_name == 'print':
-            print(*args)
+            for arg in self.args:
+                value = arg.eval()
+
+                # Print metadata if AUDIO_FILE
+                if isinstance(arg, Identifier) and arg.name in variables:
+                    var = variables[arg.name]
+                    if var.type == VariableType.AUDIO_FILE:
+                        tag = var.value.tag
+                        print(f"title: {tag.title or 'None'}")
+                        print(f"artist: {tag.artist or 'None'}")
+                        print(f"album: {tag.album or 'None'}")
+                        print(f"album artist: {tag.album_artist or 'None'}")
+                        print(f"track: {tag.track_num[0] if tag.track_num else 'None'}")
+                    else:
+                        print(value)
+                else:
+                    print(value)
         elif self.func_name == 'set':
             var_name = self.args[0].name
 
@@ -194,7 +210,34 @@ class FunctionCall(ASTNode):
             file = eyed3.load(path)
             return file
 
+        elif self.func_name == 'length':
+            if not isinstance(args[0], str):
+                raise TypeError(f"Argument to 'length' must be a string, got {type(args[0])}")
+            return len(args[0])
 
+        elif self.func_name == 'slice':
+            if not isinstance(args[0], str):
+                raise TypeError(f"First argument to 'slice' must be a string, got {type(args[0])}")
+            start = args[1]
+            if len(args) == 3:
+                length = args[2]
+                return args[0][start:start + length]
+            return args[0][start:]  # Slice until the end if length is not provided
+
+        elif self.func_name == 'includes':
+            if not isinstance(args[0], str) or not isinstance(args[1], str):
+                raise TypeError(f"Arguments to 'includes' must be strings")
+            return args[1] in args[0]
+
+        elif self.func_name == 'startsWith':
+            if not isinstance(args[0], str) or not isinstance(args[1], str):
+                raise TypeError(f"Arguments to 'startsWith' must be strings")
+            return args[0].startswith(args[1])
+
+        elif self.func_name == 'endsWith':
+            if not isinstance(args[0], str) or not isinstance(args[1], str):
+                raise TypeError(f"Arguments to 'endsWith' must be strings")
+            return args[0].endswith(args[1])
         # Add more function calls as needed
 
 # ---- PROGRAM ----
@@ -256,6 +299,9 @@ def p_strexpr(p):
     'strexpr : QUOTE STRCONTENT QUOTE'
     p[0] = Literal(p[2])
 
+def p_strexpr_identifier(p):
+    '''strexpr : IDENTIFIER'''
+    p[0] = Identifier(p[1])  # Wrap the identifier for evaluation
 def p_id_eq_numexpr(p):
     'statement : IDENTIFIER EQUALS numexpr'
     p[0] = Assignment(p[1], p[3], VariableType.NUMBER)
@@ -343,6 +389,43 @@ def p_statement_file_set(p):
 def p_statement_file_savefile(p):
     'statement : SAVEFILE LPAREN IDENTIFIER RPAREN'
     p[0] = FunctionCall('save_file', [Identifier(p[3])])
+
+# ---- STRING METHODS ----
+def p_function_length(p):
+    '''strexpr : LENGTH LPAREN strexpr RPAREN'''
+    p[0] = FunctionCall('length', [p[3]])
+def p_function_slice(p):
+    '''strexpr : SLICE LPAREN strexpr COMMA numexpr COMMA numexpr RPAREN
+               | SLICE LPAREN strexpr COMMA numexpr RPAREN'''
+    if len(p) == 9:
+        p[0] = FunctionCall('slice', [p[3], p[5], p[7]])
+    else:
+        p[0] = FunctionCall('slice', [p[3], p[5]])
+
+def p_function_includes(p):
+    'boolexpr : INCLUDES LPAREN strexpr COMMA strexpr RPAREN'
+    p[0] = FunctionCall('includes', [p[3], p[5]])
+
+def p_function_startsWith(p):
+    'boolexpr : STARTSWITH LPAREN strexpr COMMA strexpr RPAREN'
+    p[0] = FunctionCall('startsWith', [p[3], p[5]])
+
+def p_function_endsWith(p):
+    'boolexpr : ENDSWITH LPAREN strexpr COMMA strexpr RPAREN'
+    p[0] = FunctionCall('endsWith', [p[3], p[5]])
+
+
+# ---- STRING CONCATENATION ----
+def p_strexpr_concat(p):
+    '''strexpr : strexpr PLUS strexpr
+               | strexpr PLUS numexpr'''
+    if isinstance(p[3], Literal) and isinstance(p[3].value, (int, float)):
+        p[0] = Literal(p[1].eval() + str(p[3].eval()))
+    elif isinstance(p[3], Literal):
+        p[0] = Literal(p[1].eval() + p[3].eval())
+    else:
+        raise TypeError(f"Cannot concatenate {type(p[1])} and {type(p[3])}")
+
 
 # Rules to handle negative numbers and operator precedence
 precedence = (

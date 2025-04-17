@@ -40,7 +40,14 @@ tokens = (
     'FALSE',  # False
 
     'IF',  # if
-    'THEN'  # then
+    'THEN',  # then
+
+# New tokens for string methods
+    'LENGTH',  # length
+    'SLICE',  # slice
+    'INCLUDES',  # includes
+    'STARTSWITH',  # startsWith
+    'ENDSWITH',  # endsWith
 )
 
 t_ignore = ' \t'
@@ -66,6 +73,26 @@ t_TRUE = r'True'
 t_FALSE = r'False'
 t_STRCONTENT = r'(?<=")[^"\n,]+(?=")'
 
+
+def t_LENGTH(t):
+    r'length'
+    return t
+
+def t_SLICE(t):
+    r'slice'
+    return t
+
+def t_INCLUDES(t):
+    r'includes'
+    return t
+
+def t_STARTSWITH(t):
+    r'startsWith'
+    return t
+
+def t_ENDSWITH(t):
+    r'endsWith'
+    return t
 def t_IF(t):
     r'if'
     return t
@@ -134,6 +161,7 @@ def t_NUMBER(t):
     r'-?\d+'  # Modified to allow negative numbers with a leading minus sign
     t.value = int(t.value)
     return t
+
 
 
 def t_error(t):
