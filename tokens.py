@@ -42,7 +42,12 @@ tokens = (
     'IF',  # if
     'THEN',  # then
     'WHILE',  # while
-    'BREAK'  # break
+    'BREAK',  # break
+    'LENGTH',  # length
+    'SLICE',  # slice
+    'INCLUDES',  # includes
+    'STARTSWITH',  # startsWith
+    'ENDSWITH'  # endsWith
 )
 
 t_ignore = ' \t'
@@ -68,6 +73,26 @@ t_TRUE = r'True'
 t_FALSE = r'False'
 t_STRCONTENT = r'(?<=")[^"\n,]+(?=")'
 
+
+def t_LENGTH(t):
+    r'length'
+    return t
+
+def t_SLICE(t):
+    r'slice'
+    return t
+
+def t_INCLUDES(t):
+    r'includes'
+    return t
+
+def t_STARTSWITH(t):
+    r'startsWith'
+    return t
+
+def t_ENDSWITH(t):
+    r'endsWith'
+    return t
 def t_IF(t):
     r'if'
     return t
@@ -144,6 +169,7 @@ def t_NUMBER(t):
     r'(?<!")\b-?\d+\b(?!")'
     t.value = int(t.value)
     return t
+
 
 
 def t_error(t):

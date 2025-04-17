@@ -1,5 +1,7 @@
 import io
+import os
 import unittest.mock
+import tempfile
 from main import parser
 
 
@@ -94,8 +96,42 @@ class PrintTestCase(unittest.TestCase):
     def test_print_numexpr_minus(self, mock_stdout):
         code = "print(1 - 1)"
         output = get_output(code, mock_stdout)
-
         self.assertEqual(output, "0")
+
+    @unittest.mock.patch('sys.stdout', new_callable=io.StringIO)
+    def test_print_mp3_info(self, mock_stdout):
+        with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
+            self.file = tmp.name
+
+        try:
+            os.system(f"cp ../../test.mp3 {tmp.name}")
+
+            code = f"""
+                    file f = load("{self.file}")
+                    set(f, "title", "Test Title")
+                    set(f, "artist", "Test Artist")
+                    set(f, "album_artist", "Test Album Artist")
+                    set(f, "track", "1")
+                    print(f)
+                """
+
+            expected_output = (
+                "title: Test Title\n"
+                "artist: Test Artist\n"
+                "album: None\n"
+                "album artist: Test Album Artist\n"
+                "track: 1"
+            )
+
+            output = get_output(code, mock_stdout)
+
+            self.assertEqual(output, expected_output)
+
+        finally:
+            try:
+                os.unlink(tmp.name)
+            except OSError:
+                pass
 
 
 if __name__ == '__main__':
