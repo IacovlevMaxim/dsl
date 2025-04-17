@@ -111,7 +111,7 @@ class PrintTestCase(unittest.TestCase):
                     set(f, "title", "Test Title")
                     set(f, "artist", "Test Artist")
                     set(f, "album_artist", "Test Album Artist")
-                    set(f, "track", "1")
+                    set(f, "track_num", "1")
                     print(f)
                 """
 
