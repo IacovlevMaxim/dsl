@@ -41,13 +41,13 @@ tokens = (
 
     'IF',  # if
     'THEN',  # then
-
-# New tokens for string methods
+    'WHILE',  # while
+    'BREAK',  # break
     'LENGTH',  # length
     'SLICE',  # slice
     'INCLUDES',  # includes
     'STARTSWITH',  # startsWith
-    'ENDSWITH',  # endsWith
+    'ENDSWITH'  # endsWith
 )
 
 t_ignore = ' \t'
@@ -99,6 +99,14 @@ def t_IF(t):
 
 def t_THEN(t):
     r'then'
+    return t
+
+def t_WHILE(t):
+    r'while'
+    return t
+
+def t_BREAK(t):
+    r'break'
     return t
 
 def t_BOOLEAN(t):
@@ -158,7 +166,7 @@ def t_IDENTIFIER(t):
 
 
 def t_NUMBER(t):
-    r'-?\d+'  # Modified to allow negative numbers with a leading minus sign
+    r'(?<!")\b-?\d+\b(?!")'
     t.value = int(t.value)
     return t
 
