@@ -40,7 +40,9 @@ tokens = (
     'FALSE',  # False
 
     'IF',  # if
-    'THEN'  # then
+    'THEN',  # then
+    'WHILE',  # while
+    'BREAK'  # break
 )
 
 t_ignore = ' \t'
@@ -72,6 +74,14 @@ def t_IF(t):
 
 def t_THEN(t):
     r'then'
+    return t
+
+def t_WHILE(t):
+    r'while'
+    return t
+
+def t_BREAK(t):
+    r'break'
     return t
 
 def t_BOOLEAN(t):

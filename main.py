@@ -40,6 +40,13 @@ class ASTNode:
     def eval(self):
         raise NotImplementedError("Subclasses must implement eval()")
 
+class BreakException(Exception):
+    """Exception raised when a break statement is encountered"""
+    pass
+
+class InfiniteLoopError(Exception):
+    """Exception raised when an infinite loop is detected"""
+    pass
 
 class Program(ASTNode):
     """Represents a program (sequence of statements)"""
@@ -173,6 +180,48 @@ class IfStatement(ASTNode):
         return None
 
 
+class WhileLoop(ASTNode):
+    """Represents while loop statements"""
+
+    def __init__(self, condition, body):
+        self.condition = condition
+        self.body = body
+        self.max_iterations = 10000
+
+    def eval(self):
+        if not self.condition.eval():
+            return None
+        iterations = 0
+        initial_vars = {}
+        for var_name, var_obj in variables.items():
+            if isinstance(var_obj.value, (int, float, bool, str)):
+                initial_vars[var_name] = var_obj.value
+        try:
+            while self.condition.eval():
+                try:
+                    self.body.eval()
+                except BreakException:
+                    break
+                iterations += 1
+                if iterations >= self.max_iterations:
+                    changed = False
+                    for var_name, initial_value in initial_vars.items():
+                        if var_name in variables and variables[var_name].value != initial_value:
+                            changed = True
+                            break
+                    if not changed:
+                        raise InfiniteLoopError("Potential infinite loop detected")
+                    print(f"Warning: Loop has run {self.max_iterations} iterations")
+
+        except InfiniteLoopError as e:
+            raise InfiniteLoopError(f"Infinite loop detected: {str(e)}")
+        return None
+
+class BreakStatement(ASTNode):
+    """Represents a break statement"""
+    def eval(self):
+        raise BreakException()
+
 class FunctionCall(ASTNode):
     """Represents function calls like print, set_author, etc."""
 
@@ -273,6 +322,10 @@ def p_statement_number_id_assignment(p):
 def p_numexpr_number(p):
     'numexpr : NUMBER'
     p[0] = Literal(p[1])
+
+def p_numexpr_identifier(p):
+    'numexpr : IDENTIFIER'
+    p[0] = Identifier(p[1])
 
 def p_numexpr_negative(p):
     'numexpr : MINUS numexpr %prec UMINUS'
@@ -376,6 +429,7 @@ def p_statement_boolean_id_assignment_boolexpr(p):
     variable_name = p[1].split()[1]
     p[0] = VariableDeclaration(VariableType.BOOLEAN, variable_name, p[3])
 
+
 # ---- IF STATEMENTS ----
 def p_statement_if_short(p):
     '''statement : IF LPAREN boolexpr RPAREN THEN statement'''
@@ -384,6 +438,16 @@ def p_statement_if_short(p):
 def p_statement_if_extended(p):
     '''statement : IF LPAREN boolexpr RPAREN THEN LCURLY program RCURLY'''
     p[0] = IfStatement(p[3], p[7])
+
+# ---- WHILE STATEMENTS ----
+def p_statement_while(p):
+    '''statement : WHILE LPAREN boolexpr RPAREN LCURLY program RCURLY'''
+    p[0] = WhileLoop(p[3], p[6])
+
+# ---- BREAK STATEMENT ----
+def p_statement_break(p):
+    '''statement : BREAK'''
+    p[0] = BreakStatement()
 
 # ---- FILE METHODS ----
 def p_statement_file_set(p):
