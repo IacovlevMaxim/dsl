@@ -1,12 +1,7 @@
 import io
 import unittest.mock
-from main import parser
+from utils.get_output import *
 
-def get_output(code, mock_stdout):
-    ast = parser.parse(code, tracking=True)
-    ast.eval()
-    output = mock_stdout.getvalue().strip('\n')
-    return output
 
 class MulDivTests(unittest.TestCase):
     @unittest.mock.patch('sys.stdout', new_callable=io.StringIO)
@@ -14,7 +9,6 @@ class MulDivTests(unittest.TestCase):
         code = "print(2 * 3)"
         output = get_output(code, mock_stdout)
         self.assertEqual(output, "6")
-
 
     @unittest.mock.patch('sys.stdout', new_callable=io.StringIO)
     def test_simple_division(self, mock_stdout):

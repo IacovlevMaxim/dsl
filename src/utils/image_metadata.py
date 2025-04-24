@@ -15,6 +15,7 @@ field_to_prefix = {
     "ImageHeight": "PNG",
     "BitDepth": "PNG",
     "ColorType": "PNG",
+    "Comment": "PNG",
     "Compression": "PNG",
     "Filter": "PNG",
     "Interlace": "PNG",

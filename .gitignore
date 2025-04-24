@@ -3,6 +3,5 @@ venv/
 __pycache__/
 *.out
 parsetab.py
-test.*
 code.txt
 .DS_Store

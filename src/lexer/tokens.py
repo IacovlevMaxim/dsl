@@ -78,45 +78,57 @@ def t_LENGTH(t):
     r'length'
     return t
 
+
 def t_SLICE(t):
     r'slice'
     return t
+
 
 def t_INCLUDES(t):
     r'includes'
     return t
 
+
 def t_STARTSWITH(t):
     r'startsWith'
     return t
 
+
 def t_ENDSWITH(t):
     r'endsWith'
     return t
+
+
 def t_IF(t):
     r'if'
     return t
+
 
 def t_THEN(t):
     r'then'
     return t
 
+
 def t_WHILE(t):
     r'while'
     return t
 
+
 def t_BREAK(t):
     r'break'
     return t
+
 
 def t_BOOLEAN(t):
     r'True|False'
     t.value = True if t.value == 'True' else False
     return t
 
+
 def t_BOOLEAN_ID(t):
     r'boolean\s+[a-zA-Z_][a-zA-Z_0-9]*'
     return t
+
 
 def t_NEWLINE(t):
     r'\n+'
@@ -146,6 +158,7 @@ def t_SAVEFILE(t):
     t.type = 'SAVEFILE'
     return t
 
+
 def t_FILE_ID(t):
     r'file\s+[a-zA-Z_][a-zA-Z_0-9]*'
     return t
@@ -155,9 +168,11 @@ def t_NUMBER_ID(t):
     r'number\s+[a-zA-Z_][a-zA-Z_0-9]*'
     return t
 
+
 def t_STRING_ID(t):
     r'string\s+[a-zA-Z_][a-zA-Z_0-9]*'
     return t
+
 
 def t_IDENTIFIER(t):
     r'(?<!"|\/)\b[a-zA-Z_^n][a-zA-Z_0-9]*\b(?!"|\/)'
@@ -169,7 +184,6 @@ def t_NUMBER(t):
     r'(?<!")\b-?\d+\b(?!")'
     t.value = int(t.value)
     return t
-
 
 
 def t_error(t):

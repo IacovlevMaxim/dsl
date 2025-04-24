@@ -1,15 +1,7 @@
-import tempfile
-import os
 import io
 import unittest.mock
-from main import parser
-
-
-def get_output(code, mock_stdout):
-    ast = parser.parse(code, tracking=True)
-    ast.eval()
-    output = mock_stdout.getvalue().strip('\n')
-    return output
+from utils.get_output import *
+from utils.with_tempfile import *
 
 
 class AssignmentTestCase(unittest.TestCase):
@@ -95,29 +87,13 @@ class AssignmentTestCase(unittest.TestCase):
             get_output(code, mock_stdout)
 
     @unittest.mock.patch('sys.stdout', new_callable=io.StringIO)
-    def test_fileid_file(self, mock_stdout):
-        with tempfile.NamedTemporaryFile(suffix='.mp3', delete=False) as tmp1, \
-                tempfile.NamedTemporaryFile(suffix='.mp3', delete=False) as tmp2:
-            self.file1 = tmp1.name
-            self.file2 = tmp2.name
+    @with_tempfile('mp3')
+    def test_fileid_file(self, file1, mock_stdout):
+        os.system(f"echo {file1}")
+        code = f'file f = load("{file1}")\nprint(f)'
+        output = get_output(code, mock_stdout)
 
-            tmp1.flush()
-            tmp2.flush()
-
-            os.system(f"cp ../../test.mp3 {tmp1.name}")
-            os.system(f"cp ../../test.mp3 {tmp2.name}")
-        try:
-            # Run your test code with the temporary files
-            code = f'file f = load("{self.file1}")\nprint(f)'
-            output = get_output(code, mock_stdout)
-
-            print(output)
-        finally:
-            try:
-                os.unlink(self.file1)
-                os.unlink(self.file2)
-            except OSError:
-                pass
+        print(output)
 
 
 if __name__ == '__main__':

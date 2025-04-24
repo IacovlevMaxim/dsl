@@ -1,15 +1,7 @@
 import io
-import os
 import unittest.mock
-import tempfile
-from main import parser
-
-
-def get_output(code, mock_stdout):
-    ast = parser.parse(code, tracking=True)
-    ast.eval()
-    output = mock_stdout.getvalue().strip('\n')
-    return output
+from utils.get_output import *
+from utils.with_tempfile import *
 
 
 class PrintTestCase(unittest.TestCase):
@@ -99,39 +91,29 @@ class PrintTestCase(unittest.TestCase):
         self.assertEqual(output, "0")
 
     @unittest.mock.patch('sys.stdout', new_callable=io.StringIO)
-    def test_print_mp3_info(self, mock_stdout):
-        with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
-            self.file = tmp.name
+    @with_tempfile("mp3")
+    def test_print_mp3_info(self, file, mock_stdout):
+        code = f"""
+                            file f = load("{file}")
+                            set(f, "title", "Test Title")
+                            set(f, "artist", "Test Artist")
+                            set(f, "album_artist", "Test Album Artist")
+                            set(f, "album", "Test Album")
+                            set(f, "track_num", "1")
+                            print(f)
+                        """
 
-        try:
-            os.system(f"cp ../../test.mp3 {tmp.name}")
+        expected_output = (
+            "title: Test Title\n"
+            "artist: Test Artist\n"
+            "album: Test Album\n"
+            "album artist: Test Album Artist\n"
+            "track: 1"
+        )
 
-            code = f"""
-                    file f = load("{self.file}")
-                    set(f, "title", "Test Title")
-                    set(f, "artist", "Test Artist")
-                    set(f, "album_artist", "Test Album Artist")
-                    set(f, "track_num", "1")
-                    print(f)
-                """
+        output = get_output(code, mock_stdout)
 
-            expected_output = (
-                "title: Test Title\n"
-                "artist: Test Artist\n"
-                "album: None\n"
-                "album artist: Test Album Artist\n"
-                "track: 1"
-            )
-
-            output = get_output(code, mock_stdout)
-
-            self.assertEqual(output, expected_output)
-
-        finally:
-            try:
-                os.unlink(tmp.name)
-            except OSError:
-                pass
+        self.assertEqual(output, expected_output)
 
 
 if __name__ == '__main__':

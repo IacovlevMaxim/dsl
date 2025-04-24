@@ -5,6 +5,42 @@
 - Have pip (preferably 22.x.x+)
 - Nice to have: Pycharm
 
+## Updates on project structure
+Below you can find the new structure of our codebase
+```
+src/
+├── interpreter
+├── lexer
+├── main.py
+├── parser
+└── utils
+
+tests/
+├── temp
+├── unit
+└── utils
+```
+`src/` folder should include all code for our DSL.
+
+`src/interpreter` will include all code for the interpreter. This folder will be refactored in the soon future. 
+For now, it only includes the `src/interpreter/exceptions` folder with exceptions specific for the interpreter.
+
+`src/lexer` only includes a `tokens.py`, which remained unchanged
+
+`src/parser` include a `parser.py` file with all necessary production rules. This folder might also be refactored in the future.
+
+`src/utils` includes helper functions or constants that are used across the codebase (not only in one single file)
+
+
+`tests/` includes all code necessary for testing
+
+`tests/temp` includes temporary files that are used for tests. 
+Some files are already included. If you need any other file extensions, please include files with the smallest size (pro tip: google small files)
+
+`tests/unit` includes test files for each functionality/task.
+
+`tests/utils` includes utility functions for testing
+
 ## Before making ANY changes
 Before writing any code, everytime you open your code editor, write these commands in the command line:
 ```

@@ -1,14 +1,7 @@
-import unittest
+import unittest.mock
 import io
 import unittest.mock
-from main import parser
-
-
-def get_output(code, mock_stdout):
-    ast = parser.parse(code, tracking=True)
-    ast.eval()
-    output = mock_stdout.getvalue().strip('\n')
-    return output
+from utils.get_output import *
 
 
 class StringMethodsTestCase(unittest.TestCase):
