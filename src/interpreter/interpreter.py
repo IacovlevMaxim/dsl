@@ -2,6 +2,8 @@ from typing import Union
 from eyed3 import AudioFile
 import eyed3
 import exiftool
+from mutagen.mp4 import MP4
+
 
 from src.utils.image_metadata import metadata_prefix
 from src.utils.variable_type import VariableType
@@ -228,10 +230,18 @@ class FunctionCall(ASTNode):
                         metadata = var.value
                         for key, value in metadata.items():
                             print(f"{key}: {value}")
+                    elif var.type == VariableType.VIDEO_FILE:
+                        metadata = var.value  
+                        print(f"title: {metadata.get('\xa9nam', ['None'])[0]}")
+                        print(f"artist: {metadata.get('\xa9ART', ['None'])[0]}")
+                        print(f"album: {metadata.get('\xa9alb', ['None'])[0]}")
+                        print(f"genre: {metadata.get('\xa9gen', ['None'])[0]}")
+                        print(f"description: {metadata.get('desc', ['None'])[0]}")
                     else:
                         print(value)
                 else:
                     print(value)
+
         elif self.func_name == 'set':
             var_name = self.args[0].name
             var_type = variables[var_name].type
@@ -262,20 +272,44 @@ class FunctionCall(ASTNode):
 
                 variables[var_name].value[key] = value
 
+            elif var_type == VariableType.VIDEO_FILE:
+                metadata = variables[var_name].value  # MP4 object loaded with mutagen
+                field_name = args[1]
+                value = args[2]
+                # Mapping for human readable field names → internal MP4 tags
+                mp4_keys = {
+                    "title": "\xa9nam",      
+                    "artist": "\xa9ART",      
+                    "album": "\xa9alb",       
+                    "genre": "\xa9gen",       
+                    "description": "desc"     
+                }
+
+                if field_name not in mp4_keys:
+                    raise AttributeError(f"Metadata field '{field_name}' does not exist for video files.")
+
+                # Set metadata field
+                metadata[mp4_keys[field_name]] = [value]
+
         elif self.func_name == 'save_file':
             var_name = self.args[0].name
             if variables[var_name].type == VariableType.AUDIO_FILE:
                 variables[var_name].value.tag.save()
+            elif var_type == VariableType.VIDEO_FILE:
+                variables[var_name].value.save()
+
         elif self.func_name == 'loadfile':
             path = args[0]
             if len(path.split('.')) < 2:
                 raise SyntaxError(f"No file extension provided for path '{path}'")
-            file_extension = path.split('.')[1]
+            file_extension = path.split('.')[1].lower()
             if file_extension == "mp3":
                 file = eyed3.load(path)
             elif file_extension == "png" or file_extension == "jpg":
                 with exiftool.ExifToolHelper() as et:
                     file = et.get_metadata(path)[0]
+            elif file_extension == "mp4" or file_extension == "mov":
+                    file = MP4(path)  
             else:
                 raise SyntaxError(f"Unsupported file extension '{file_extension}'")
             return file
