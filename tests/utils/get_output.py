@@ -1,4 +1,4 @@
-from main import parser
+from src.main import parser
 
 
 def get_output(code, mock_stdout):

@@ -237,7 +237,15 @@ class FunctionCall(ASTNode):
             var_type = variables[var_name].type
 
             if var_type == VariableType.AUDIO_FILE:
-                setattr(variables[var_name].value.tag, args[1], args[2])
+                tag = variables[var_name].value.tag
+                field_name = args[1]
+
+                # Check if the metadata field exists before setting
+                if not hasattr(tag, field_name):
+                    raise AttributeError(f"Metadata field '{field_name}' does not exist.")
+
+                setattr(tag, field_name, args[2])
+
             elif var_type == VariableType.IMAGE_FILE:
                 metadata = variables[var_name].value
                 file_path = metadata["SourceFile"] if metadata["File:Directory"] in metadata["SourceFile"] \
