@@ -293,6 +293,7 @@ class FunctionCall(ASTNode):
 
         elif self.func_name == 'save_file':
             var_name = self.args[0].name
+            var_type = variables[var_name].type
             if variables[var_name].type == VariableType.AUDIO_FILE:
                 variables[var_name].value.tag.save()
             elif var_type == VariableType.VIDEO_FILE:
