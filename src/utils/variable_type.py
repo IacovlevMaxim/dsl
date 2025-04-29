@@ -9,6 +9,7 @@ class VariableType(Enum):
     BOOLEAN = 4
     IMAGE_FILE = 5
     VIDEO_FILE = 6
+    PDF_FILE = 7
     type_names = {
         UNKNOWN: "unknown",
         NUMBER: "number",
@@ -16,5 +17,6 @@ class VariableType(Enum):
         AUDIO_FILE: "audio file",
         BOOLEAN: "boolean",
         IMAGE_FILE: "image file",
-        VIDEO_FILE: "video_file"
+        VIDEO_FILE: "video file",
+        PDF_FILE: "pdf"
     }

@@ -3,7 +3,7 @@ from eyed3 import AudioFile
 import eyed3
 import exiftool
 from mutagen.mp4 import MP4
-
+from pypdf import PdfReader, PdfWriter
 
 from src.utils.image_metadata import metadata_prefix
 from src.utils.variable_type import VariableType
@@ -237,6 +237,10 @@ class FunctionCall(ASTNode):
                         print(f"album: {metadata.get('\xa9alb', ['None'])[0]}")
                         print(f"genre: {metadata.get('\xa9gen', ['None'])[0]}")
                         print(f"description: {metadata.get('desc', ['None'])[0]}")
+                    elif var.type == VariableType.PDF_FILE:
+                        metadata = var.value.metadata
+                        for key, value in metadata.items():
+                            print(f"{key}: {value}")
                     else:
                         print(value)
                 else:
@@ -291,6 +295,17 @@ class FunctionCall(ASTNode):
                 # Set metadata field
                 metadata[mp4_keys[field_name]] = [value]
 
+            elif var_type == VariableType.PDF_FILE:
+                metadata = variables[var_name].value.metadata
+                field_name = args[1]
+                value = args[2]
+
+                if not field_name.startswith("/"):
+                    field_name = f"/{field_name}"  # PDF metadata keys should start with a slash
+
+                # Update the metadata dictionary
+                metadata[field_name] = value
+
         elif self.func_name == 'save_file':
             var_name = self.args[0].name
             var_type = variables[var_name].type
@@ -298,6 +313,16 @@ class FunctionCall(ASTNode):
                 variables[var_name].value.tag.save()
             elif var_type == VariableType.VIDEO_FILE:
                 variables[var_name].value.save()
+            elif var_type == VariableType.PDF_FILE:
+                reader = variables[var_name].value
+                writer = PdfWriter()
+                writer.append(reader)
+                writer.add_metadata(reader.metadata)
+
+                # Save back to the same file path
+                path = reader.stream.name
+                with open(path, "wb") as f:
+                    writer.write(f)
 
         elif self.func_name == 'loadfile':
             path = args[0]
@@ -310,7 +335,9 @@ class FunctionCall(ASTNode):
                 with exiftool.ExifToolHelper() as et:
                     file = et.get_metadata(path)[0]
             elif file_extension == "mp4" or file_extension == "mov":
-                    file = MP4(path)  
+                    file = MP4(path)
+            elif file_extension == "pdf":
+                file = PdfReader(path)
             else:
                 raise SyntaxError(f"Unsupported file extension '{file_extension}'")
             return file
