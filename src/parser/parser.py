@@ -1,4 +1,4 @@
-from interpreter.interpreter import *
+from src.interpreter.interpreter import *
 
 # ---- PROGRAM ----
 def p_program(p):

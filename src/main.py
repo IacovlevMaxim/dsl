@@ -1,8 +1,8 @@
 import ply.lex as lex
 import ply.yacc as yacc
 # Do not remove these imports, they are used by ply library for generating lexer and parser
-from lexer.tokens import tokens
-from lexer.tokens import *
+from src.lexer.tokens import tokens
+from src.lexer.tokens import *
 from src.parser.parser import precedence
 from src.parser.parser import *
 

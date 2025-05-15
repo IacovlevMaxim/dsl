@@ -1,4 +1,5 @@
 import io
+import unittest
 import unittest.mock
 import eyed3
 from eyed3 import AudioFile
