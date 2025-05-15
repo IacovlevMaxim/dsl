@@ -1,7 +1,7 @@
 import io
 import unittest
 import unittest.mock
-from utils.get_output import *
+from tests.utils.get_output import *
 
 
 class WhileLoopTests(unittest.TestCase):

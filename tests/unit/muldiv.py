@@ -1,6 +1,6 @@
 import io
 import unittest.mock
-from utils.get_output import *
+from tests.utils.get_output import *
 
 
 class MulDivTests(unittest.TestCase):
