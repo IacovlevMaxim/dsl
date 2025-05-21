@@ -4,6 +4,7 @@ import eyed3
 import exiftool
 from mutagen.mp4 import MP4
 from pypdf import PdfReader, PdfWriter
+from pypdf.generic import NameObject, create_string_object
 
 from src.utils.image_metadata import metadata_prefix
 from src.utils.variable_type import VariableType
@@ -295,16 +296,21 @@ class FunctionCall(ASTNode):
                 # Set metadata field
                 metadata[mp4_keys[field_name]] = [value]
 
+
             elif var_type == VariableType.PDF_FILE:
+
                 metadata = variables[var_name].value.metadata
                 field_name = args[1]
                 value = args[2]
 
                 if not field_name.startswith("/"):
-                    field_name = f"/{field_name}"  # PDF metadata keys should start with a slash
+                    field_name = f"/{field_name}"
 
-                # Update the metadata dictionary
+                field_name = NameObject(field_name)
+                value = create_string_object(value)
+
                 metadata[field_name] = value
+
 
         elif self.func_name == 'save_file':
             var_name = self.args[0].name
