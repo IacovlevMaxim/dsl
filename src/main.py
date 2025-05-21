@@ -7,7 +7,7 @@ from src.parser.parser import precedence
 from src.parser.parser import *
 
 
-def load_dsl_file(filename="code.txt"):
+def load_dsl_file(filename="../code.txt"):
     try:
         with open(filename, 'r') as file:
             return file.read()
