@@ -257,6 +257,10 @@ class BreakStatement(ASTNode):
     def eval(self):
         raise BreakException()
 
+class ContinueStatement(ASTNode):
+    """Represents a continue statement"""
+    def eval(self):
+        raise ContinueException()
 
 class FunctionCall(ASTNode):
     """Represents function calls like print, set_author, etc."""
