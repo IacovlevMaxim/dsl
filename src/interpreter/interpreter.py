@@ -233,10 +233,10 @@ class FunctionCall(ASTNode):
                             print(f"{key}: {value}")
                     elif var.type == VariableType.VIDEO_FILE:
                         metadata = var.value  
-                        print(f"title: {metadata.get('\xa9nam', ['None'])[0]}")
-                        print(f"artist: {metadata.get('\xa9ART', ['None'])[0]}")
-                        print(f"album: {metadata.get('\xa9alb', ['None'])[0]}")
-                        print(f"genre: {metadata.get('\xa9gen', ['None'])[0]}")
+                        print(f"title: {metadata.get('©nam', ['None'])[0]}")
+                        print(f"artist: {metadata.get('©ART', ['None'])[0]}")
+                        print(f"album: {metadata.get('©alb', ['None'])[0]}")
+                        print(f"genre: {metadata.get('©gen', ['None'])[0]}")
                         print(f"description: {metadata.get('desc', ['None'])[0]}")
                     elif var.type == VariableType.PDF_FILE:
                         metadata = var.value.metadata
@@ -283,10 +283,10 @@ class FunctionCall(ASTNode):
                 value = args[2]
                 # Mapping for human readable field names → internal MP4 tags
                 mp4_keys = {
-                    "title": "\xa9nam",      
-                    "artist": "\xa9ART",      
-                    "album": "\xa9alb",       
-                    "genre": "\xa9gen",       
+                    "title": "©nam",
+                    "artist": "©ART",
+                    "album": "©alb",
+                    "genre": "©gen",
                     "description": "desc"     
                 }
 

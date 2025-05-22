@@ -2,8 +2,8 @@ import io
 import unittest.mock
 import exiftool
 from src.utils.image_metadata import metadata_prefix
-from utils.get_output import *
-from utils.with_tempfile import *
+from tests.utils.get_output import *
+from tests.utils.with_tempfile import *
 
 
 class ImagesTestCase(unittest.TestCase):

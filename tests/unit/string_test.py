@@ -1,7 +1,7 @@
 import unittest.mock
 import io
 import unittest.mock
-from utils.get_output import *
+from tests.utils.get_output import *
 
 
 class StringMethodsTestCase(unittest.TestCase):
