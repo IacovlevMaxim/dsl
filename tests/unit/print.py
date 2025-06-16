@@ -1,7 +1,7 @@
 import io
 import unittest.mock
-from utils.get_output import *
-from utils.with_tempfile import *
+from tests.utils.get_output import *
+from tests.utils.with_tempfile import *
 
 
 class PrintTestCase(unittest.TestCase):

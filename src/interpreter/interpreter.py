@@ -233,10 +233,10 @@ class FunctionCall(ASTNode):
                             print(f"{key}: {value}")
                     elif var.type == VariableType.VIDEO_FILE:
                         metadata = var.value  
-                        print(f"title: {metadata.get('\xa9nam', ['None'])[0]}")
-                        print(f"artist: {metadata.get('\xa9ART', ['None'])[0]}")
-                        print(f"album: {metadata.get('\xa9alb', ['None'])[0]}")
-                        print(f"genre: {metadata.get('\xa9gen', ['None'])[0]}")
+                        print(f"title: {metadata.get('©nam', ['None'])[0]}")
+                        print(f"artist: {metadata.get('©ART', ['None'])[0]}")
+                        print(f"album: {metadata.get('©alb', ['None'])[0]}")
+                        print(f"genre: {metadata.get('©gen', ['None'])[0]}")
                         print(f"description: {metadata.get('desc', ['None'])[0]}")
                     elif var.type == VariableType.PDF_FILE:
                         metadata = var.value.metadata
@@ -283,10 +283,10 @@ class FunctionCall(ASTNode):
                 value = args[2]
                 # Mapping for human readable field names → internal MP4 tags
                 mp4_keys = {
-                    "title": "\xa9nam",      
-                    "artist": "\xa9ART",      
-                    "album": "\xa9alb",       
-                    "genre": "\xa9gen",       
+                    "title": "©nam",
+                    "artist": "©ART",
+                    "album": "©alb",
+                    "genre": "©gen",
                     "description": "desc"     
                 }
 
@@ -296,9 +296,7 @@ class FunctionCall(ASTNode):
                 # Set metadata field
                 metadata[mp4_keys[field_name]] = [value]
 
-
             elif var_type == VariableType.PDF_FILE:
-
                 metadata = variables[var_name].value.metadata
                 field_name = args[1]
                 value = args[2]
@@ -310,7 +308,6 @@ class FunctionCall(ASTNode):
                 value = create_string_object(value)
 
                 metadata[field_name] = value
-
 
         elif self.func_name == 'save_file':
             var_name = self.args[0].name
@@ -341,9 +338,10 @@ class FunctionCall(ASTNode):
                 with exiftool.ExifToolHelper() as et:
                     file = et.get_metadata(path)[0]
             elif file_extension == "mp4" or file_extension == "mov":
-                    file = MP4(path)
+                file = MP4(path)
             elif file_extension == "pdf":
                 file = PdfReader(path)
+                file.stream.name = path
             else:
                 raise SyntaxError(f"Unsupported file extension '{file_extension}'")
             return file
