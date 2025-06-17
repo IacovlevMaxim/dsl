@@ -162,10 +162,21 @@ def p_statement_while(p):
     '''statement : WHILE LPAREN boolexpr RPAREN LCURLY program RCURLY'''
     p[0] = WhileLoop(p[3], p[6])
 
+# ---- FOR OF LOOP ----
+def p_statement_for_of(p):
+    '''statement : FOR LPAREN FILE_ID OF strexpr RPAREN LCURLY program RCURLY'''
+    variable_name = p[3].split()[1]
+    p[0] = ForLoop(VariableType.UNKNOWN, variable_name, p[5], p[8])
+
 # ---- BREAK STATEMENT ----
 def p_statement_break(p):
     '''statement : BREAK'''
     p[0] = BreakStatement()
+
+# ---- CONTINUE STATEMENT ----
+def p_statement_continue(p):
+    '''statement : CONTINUE'''
+    p[0] = ContinueStatement()
 
 # ---- FILE METHODS ----
 def p_statement_file_set(p):

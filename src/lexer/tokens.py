@@ -43,6 +43,9 @@ tokens = (
     'THEN',  # then
     'WHILE',  # while
     'BREAK',  # break
+    'FOR',  # for
+    'OF',  # of
+    'CONTINUE',  # continue
     'LENGTH',  # length
     'SLICE',  # slice
     'INCLUDES',  # includes
@@ -113,11 +116,21 @@ def t_WHILE(t):
     r'while'
     return t
 
+def t_FOR(t):
+    r'for'
+    return t
+
+def t_OF(t):
+    r'of'
+    return t
 
 def t_BREAK(t):
     r'break'
     return t
 
+def t_CONTINUE(t):
+    r'continue'
+    return t
 
 def t_BOOLEAN(t):
     r'True|False'

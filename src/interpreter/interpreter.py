@@ -2,6 +2,7 @@ from typing import Union
 from eyed3 import AudioFile
 import eyed3
 import exiftool
+import os
 from mutagen.mp4 import MP4
 from pypdf import PdfReader, PdfWriter
 from pypdf.generic import NameObject, create_string_object
@@ -9,6 +10,7 @@ from pypdf.generic import NameObject, create_string_object
 from src.utils.image_metadata import metadata_prefix
 from src.utils.variable_type import VariableType
 from src.interpreter.exceptions.break_exception import BreakException
+from src.interpreter.exceptions.continue_exception import ContinueException
 from src.interpreter.exceptions.infinte_loop_exception import InfiniteLoopException
 from src.interpreter.map_fields import variable_type_to_map_field
 
@@ -183,6 +185,8 @@ class WhileLoop(ASTNode):
                     self.body.eval()
                 except BreakException:
                     break
+                except ContinueException:
+                    pass
                 iterations += 1
                 if iterations >= self.max_iterations:
                     changed = False
@@ -199,11 +203,68 @@ class WhileLoop(ASTNode):
         return None
 
 
+class ForLoop(ASTNode):
+    """Represents a for...of loop that iterates through files in a directory"""
+
+    def __init__(self, var_type, var_name, directory_expr, body):
+        self.var_type = var_type
+        self.var_name = var_name
+        self.directory_expr = directory_expr
+        self.body = body
+
+    def eval(self):
+        if self.var_name in variables:
+            raise NameError(f"Variable '{self.var_name}' already defined")
+
+        dir_path = self.directory_expr.eval()
+
+        if not os.path.isdir(dir_path):
+            raise ValueError(f"Directory '{dir_path}' does not exist")
+
+        files = [f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))]
+
+        if not files:
+            return None
+
+        for file_name in files:
+            file_path = os.path.join(dir_path, file_name)
+
+            file_extension = file_name.split('.')[-1].lower() if '.' in file_name else ""
+
+            if file_extension == "mp3":
+                var_type = VariableType.AUDIO_FILE
+                file_value = eyed3.load(file_path)
+            elif file_extension in ['png', 'jpg', 'jpeg', 'gif']:
+                var_type = VariableType.IMAGE_FILE
+                with exiftool.ExifToolHelper() as et:
+                    file_value = et.get_metadata(file_path)[0]
+            else:
+                var_type = VariableType.UNKNOWN
+                file_value = file_path
+
+            variables[self.var_name] = Variable(self.var_name, var_type, file_value)
+
+            try:
+                self.body.eval()
+            except BreakException:
+                break
+            except ContinueException:
+                continue
+            finally:
+                if self.var_name in variables:
+                    del variables[self.var_name]
+
+        return None
+
 class BreakStatement(ASTNode):
     """Represents a break statement"""
     def eval(self):
         raise BreakException()
 
+class ContinueStatement(ASTNode):
+    """Represents a continue statement"""
+    def eval(self):
+        raise ContinueException()
 
 class FunctionCall(ASTNode):
     """Represents function calls like print, set_author, etc."""
