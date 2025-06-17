@@ -1,10 +1,17 @@
 import io
 import unittest.mock
+<<<<<<< handlePDF
+import exiftool
+from src.utils.image_metadata import metadata_prefix
+from tests.utils.get_output import *
+from tests.utils.with_tempfile import *
+=======
 import eyed3
 from eyed3 import AudioFile
 from src.main import parser, variables
 from tests.utils.get_output import get_output
 from tests.utils.with_tempfile import with_tempfile
+>>>>>>> dev
 
 
 class TestMP3MetadataEditing(unittest.TestCase):

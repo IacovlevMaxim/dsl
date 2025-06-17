@@ -10,7 +10,7 @@ def with_tempfile(extension):
             with tempfile.NamedTemporaryFile(suffix=f".{extension}", delete=False) as tmp:
                 temp_path = tmp.name
                 try:
-                    if extension in ('png', 'jpg', 'jpeg', 'gif', 'mp3'):
+                    if extension in ('png', 'jpg', 'jpeg', 'gif', 'mp3', 'mp4', 'pdf'):
                         tmp.flush()
                         os.system(f"cp ../temp/test.{extension} {temp_path}")
                     return test_func(self, temp_path, *args, **kwargs)

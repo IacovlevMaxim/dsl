@@ -19,6 +19,10 @@ def p_statement_file_id_assignment(p):
         variable_type = VariableType.AUDIO_FILE
     elif file_extension == "png" or file_extension == "jpg":
         variable_type = VariableType.IMAGE_FILE
+    elif file_extension in ("mp4", "mov"):
+        variable_type = VariableType.VIDEO_FILE
+    elif file_extension == "pdf":
+        variable_type = VariableType.PDF_FILE
     else:
         variable_type = VariableType.UNKNOWN
 
