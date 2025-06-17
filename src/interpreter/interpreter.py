@@ -10,6 +10,7 @@ from src.utils.image_metadata import metadata_prefix
 from src.utils.variable_type import VariableType
 from src.interpreter.exceptions.break_exception import BreakException
 from src.interpreter.exceptions.infinte_loop_exception import InfiniteLoopException
+from src.interpreter.map_fields import variable_type_to_map_field
 
 variables = {}
 
@@ -250,63 +251,42 @@ class FunctionCall(ASTNode):
         elif self.func_name == 'set':
             var_name = self.args[0].name
             var_type = variables[var_name].type
+            if var_type not in variable_type_to_map_field:
+                raise TypeError(f"Unsupported variable type '{var_type}' for setting metadata.")
+
+            # Map the field name using the appropriate function
+            map_field_func = variable_type_to_map_field[var_type]
+            field_name = map_field_func(args[1])
+            value = args[2]
 
             if var_type == VariableType.AUDIO_FILE:
                 tag = variables[var_name].value.tag
-                field_name = args[1]
-
-                # Check if the metadata field exists before setting
                 if not hasattr(tag, field_name):
                     raise AttributeError(f"Metadata field '{field_name}' does not exist.")
 
-                setattr(tag, field_name, args[2])
+                setattr(tag, field_name, value)
 
             elif var_type == VariableType.IMAGE_FILE:
                 metadata = variables[var_name].value
                 file_path = metadata["SourceFile"] if metadata["File:Directory"] in metadata["SourceFile"] \
                     else metadata["File:Directory"] + "/" + metadata["SourceFile"]
-                key = args[1] if ":" in args[1] else f"{metadata_prefix(args[1])}:{args[1]}"
-                print("key", key)
-                print("file_path", file_path)
-                value = args[2]
+
                 with exiftool.ExifTool() as et:
                     try:
-                        et.execute(f"-{key}={value}", file_path)
+                        et.execute(f"-{field_name}={value}", file_path)
                     except exiftool.exceptions.ExifToolNotRunning:
                         print("Exiftool not running")
 
-                variables[var_name].value[key] = value
+                variables[var_name].value[field_name] = value
 
             elif var_type == VariableType.VIDEO_FILE:
-                metadata = variables[var_name].value  # MP4 object loaded with mutagen
-                field_name = args[1]
-                value = args[2]
-                # Mapping for human readable field names → internal MP4 tags
-                mp4_keys = {
-                    "title": "©nam",
-                    "artist": "©ART",
-                    "album": "©alb",
-                    "genre": "©gen",
-                    "description": "desc"     
-                }
-
-                if field_name not in mp4_keys:
-                    raise AttributeError(f"Metadata field '{field_name}' does not exist for video files.")
-
-                # Set metadata field
-                metadata[mp4_keys[field_name]] = [value]
+                metadata = variables[var_name].value
+                metadata[field_name] = [value]
 
             elif var_type == VariableType.PDF_FILE:
                 metadata = variables[var_name].value.metadata
-                field_name = args[1]
-                value = args[2]
-
-                if not field_name.startswith("/"):
-                    field_name = f"/{field_name}"
-
                 field_name = NameObject(field_name)
                 value = create_string_object(value)
-
                 metadata[field_name] = value
 
         elif self.func_name == 'save_file':
