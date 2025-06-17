@@ -1,5 +1,6 @@
 import ply.lex as lex
 import ply.yacc as yacc
+import tempfile
 # Do not remove these imports, they are used by ply library for generating lexer and parser
 from src.lexer.tokens import tokens
 from src.lexer.tokens import *
